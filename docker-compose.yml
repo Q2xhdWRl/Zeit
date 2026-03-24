@@ -1,0 +1,86 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-zeiterfassung}
+      POSTGRES_USER: ${DB_USER:-zeit_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-zeit_app} -d ${DB_NAME:-zeiterfassung}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      APP_PORT: "8080"
+      APP_ENV: ${APP_ENV:-development}
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-zeiterfassung}
+      DB_USER: ${DB_USER:-zeit_app}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_SSLMODE: disable
+      SESSION_SECRET: ${SESSION_SECRET:-dev-secret-change-in-production}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${APP_HOST:-localhost}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
+    depends_on:
+      - backend
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${APP_HOST:-localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+networks:
+  web:
+    driver: bridge
+  internal:
+    driver: bridge

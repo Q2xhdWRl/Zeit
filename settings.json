@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(.env.example)",
+      "Read(**/.env.example)",
+      "Read(.example.env)",
+      "Read(**/.example.env)",
+      "Edit(.env.example)",
+      "Edit(**/.env.example)",
+      "Edit(.example.env)",
+      "Edit(**/.example.env)",
+      "Write(.env.example)",
+      "Write(**/.env.example)",
+      "Write(.example.env)",
+      "Write(**/.example.env)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(**/.env)",
+      "Read(.env.*)",
+      "Read(**/.env.*)",
+      "Edit(.env)",
+      "Edit(**/.env)",
+      "Edit(.env.*)",
+      "Edit(**/.env.*)",
+      "Write(.env)",
+      "Write(**/.env)",
+      "Write(.env.*)",
+      "Write(**/.env.*)"
+    ]
+  }
+}
