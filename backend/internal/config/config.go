@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,6 +16,16 @@ type Config struct {
 	CORSAllowedURLs []string
 	SessionSecret   string
 	SessionMaxAge   time.Duration
+	AzureAD         AzureADConfig
+	FrontendURL     string
+}
+
+// AzureADConfig holds Azure AD / Entra ID OIDC settings.
+type AzureADConfig struct {
+	TenantID     string
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
 }
 
 // DBConfig holds database connection parameters.
@@ -37,6 +48,8 @@ func (db DBConfig) DSN() string {
 
 // Load reads configuration from environment variables and validates required fields.
 func Load() (*Config, error) {
+	frontendURL := getEnv("FRONTEND_URL", "http://localhost:3000")
+
 	cfg := &Config{
 		Port: getEnvInt("APP_PORT", 8080),
 		Env:  getEnv("APP_ENV", "development"),
@@ -48,8 +61,16 @@ func Load() (*Config, error) {
 			Password: os.Getenv("DB_PASSWORD"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
-		SessionSecret: os.Getenv("SESSION_SECRET"),
-		SessionMaxAge: time.Duration(getEnvInt("SESSION_MAX_AGE", 86400)) * time.Second,
+		CORSAllowedURLs: getEnvList("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000"}),
+		SessionSecret:   os.Getenv("SESSION_SECRET"),
+		SessionMaxAge:   time.Duration(getEnvInt("SESSION_MAX_AGE", 86400)) * time.Second,
+		AzureAD: AzureADConfig{
+			TenantID:     os.Getenv("AZURE_TENANT_ID"),
+			ClientID:     os.Getenv("AZURE_CLIENT_ID"),
+			ClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
+			RedirectURL:  getEnv("AZURE_REDIRECT_URL", frontendURL+"/api/auth/callback"),
+		},
+		FrontendURL: frontendURL,
 	}
 
 	if cfg.DB.Password == "" {
@@ -67,6 +88,24 @@ func getEnv(key, fallback string) string {
 		return val
 	}
 	return fallback
+}
+
+func getEnvList(key string, fallback []string) []string {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	parts := strings.Split(val, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if trimmed := strings.TrimSpace(p); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	if len(result) == 0 {
+		return fallback
+	}
+	return result
 }
 
 func getEnvInt(key string, fallback int) int {

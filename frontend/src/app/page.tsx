@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, CalendarDays, TrendingUp } from "lucide-react";
@@ -65,9 +66,11 @@ export default function LandingPage() {
           </p>
 
           <div className="flex gap-4">
-            <Button size="lg" className="font-heading font-semibold">
-              Anmelden mit Microsoft
-            </Button>
+            <Link href="/login">
+              <Button size="lg" className="btn-glow font-heading font-semibold">
+                Anmelden mit Microsoft
+              </Button>
+            </Link>
             <Button variant="outline" size="lg" className="font-heading">
               Mehr erfahren
             </Button>

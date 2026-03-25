@@ -17,6 +17,8 @@ import (
 	"github.com/newa/zeiterfassung/internal/database"
 	"github.com/newa/zeiterfassung/internal/handler"
 	"github.com/newa/zeiterfassung/internal/middleware"
+	"github.com/newa/zeiterfassung/internal/repository"
+	"github.com/newa/zeiterfassung/internal/service"
 )
 
 func main() {
@@ -43,6 +45,11 @@ func main() {
 
 	healthHandler := handler.NewHealthHandler(db)
 
+	userRepo := repository.NewUserRepository(db)
+	sessionRepo := repository.NewSessionRepository(db)
+	authService := service.NewAuthService(cfg, userRepo, sessionRepo)
+	authHandler := handler.NewAuthHandler(authService, cfg)
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -51,6 +58,19 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", healthHandler.Check)
+
+		// Public auth routes
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/login", authHandler.Login)
+			r.Get("/callback", authHandler.Callback)
+			r.Post("/logout", authHandler.Logout)
+		})
+
+		// Protected routes
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Get("/auth/me", authHandler.Me)
+		})
 	})
 
 	srv := &http.Server{
