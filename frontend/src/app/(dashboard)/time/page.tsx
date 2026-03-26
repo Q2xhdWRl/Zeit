@@ -4,14 +4,17 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Plus, ChevronLeft, ChevronRight, Trash2, Pencil } from "lucide-react";
-import type { TimeEntry, Project, ArbZGViolation } from "@/lib/auth";
+import { Clock, Plus, ChevronLeft, ChevronRight, Trash2, Pencil, CalendarDays, Users, TrendingUp } from "lucide-react";
+import type { TimeEntry, Project, ArbZGViolation, DashboardStats, DailySummary } from "@/lib/auth";
 import {
   fetchTimeEntries,
   createTimeEntry,
   updateTimeEntry,
   deleteTimeEntry,
   fetchProjects,
+  fetchDashboardStats,
+  fetchVacationBalance,
+  fetchTimeEntrySummary,
 } from "@/lib/api";
 import ClockWidget from "@/components/clock-widget";
 
@@ -69,6 +72,24 @@ const EMPTY_FORM = {
   description: "",
 };
 
+function getLastMonday(d: Date): Date {
+  return getMonday(addDays(d, -7));
+}
+
+function formatDailyMinutes(m: number): string {
+  const h = Math.floor(m / 60);
+  const min = m % 60;
+  return `${h}h ${min.toString().padStart(2, "0")}m`;
+}
+
+function formatDiffMinutes(m: number): string {
+  const sign = m >= 0 ? "+" : "-";
+  const abs = Math.abs(m);
+  const h = Math.floor(abs / 60);
+  const min = abs % 60;
+  return `${sign}${h}:${min.toString().padStart(2, "0")}`;
+}
+
 export default function TimePage() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -78,6 +99,13 @@ export default function TimePage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+
+  // Stat cards
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [vacationDays, setVacationDays] = useState<number | null>(null);
+
+  // Last-week summary
+  const [lastWeekSummary, setLastWeekSummary] = useState<DailySummary[]>([]);
 
   const weekEnd = addDays(weekStart, 6);
 
@@ -98,6 +126,18 @@ export default function TimePage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Load stat cards + last-week summary once on mount
+  useEffect(() => {
+    fetchDashboardStats().then(setStats).catch(() => {});
+    fetchVacationBalance().then((b) => { if (b) setVacationDays(b.remaining_days); }).catch(() => {});
+
+    const lastMonday = getLastMonday(new Date());
+    const lastSunday = addDays(lastMonday, 6);
+    fetchTimeEntrySummary(toDateString(lastMonday), toDateString(lastSunday))
+      .then((s) => setLastWeekSummary(s ?? []))
+      .catch(() => {});
+  }, []);
 
   function prevWeek() {
     setWeekStart(addDays(weekStart, -7));
@@ -228,6 +268,105 @@ export default function TimePage() {
             ))}
           </ul>
         </div>
+      )}
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Heute gebucht</CardTitle>
+            <Clock className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-heading">
+              {stats ? `${Math.floor(stats.today_minutes / 60)}:${String(stats.today_minutes % 60).padStart(2, "0")}` : "0:00"} h
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Diese Woche: {stats ? `${Math.floor(stats.week_minutes / 60)}:${String(stats.week_minutes % 60).padStart(2, "0")}` : "0:00"} h
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Resturlaub</CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-heading">
+              {vacationDays !== null ? `${vacationDays} Tage` : "-- Tage"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {vacationDays !== null ? `Verbleibend ${new Date().getFullYear()}` : "Noch nicht konfiguriert"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Team heute</CardTitle>
+            <Users className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-heading">
+              {stats ? `${stats.team_present_count}/${stats.team_total_count}` : "--"}
+            </div>
+            <p className="text-xs text-muted-foreground">Anwesend</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Ueberstunden</CardTitle>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const ot = stats?.month_overtime;
+              const diff = ot?.diff_minutes ?? 0;
+              const positive = diff >= 0;
+              return (
+                <>
+                  <div className={`text-2xl font-bold font-heading ${positive ? "text-green-400" : "text-red-400"}`}>
+                    {formatDiffMinutes(diff)} h
+                  </div>
+                  <Badge variant={positive ? "default" : "destructive"} className="mt-1">
+                    {positive ? "Ueberstunden" : "Minusstunden"}
+                  </Badge>
+                </>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Last-week summary */}
+      {lastWeekSummary.length > 0 && (
+        <Card className="glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-heading">Letzte Woche</CardTitle>
+              <Badge variant="secondary">
+                {formatDailyMinutes(lastWeekSummary.reduce((s, d) => s + d.total_minutes, 0))}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-1">
+              {lastWeekSummary.map((day) => {
+                const d = new Date(day.date);
+                const label = d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+                return (
+                  <div key={day.date} className="flex items-center justify-between py-1 border-b border-border/30 last:border-0">
+                    <span className="text-sm text-muted-foreground w-28">{label}</span>
+                    <span className="text-sm font-medium text-primary">{formatDailyMinutes(day.total_minutes)}</span>
+                    <span className="text-xs text-muted-foreground">{day.entry_count} {day.entry_count === 1 ? "Eintrag" : "Eintraege"}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Week Navigation */}

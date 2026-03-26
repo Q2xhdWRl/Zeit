@@ -152,6 +152,7 @@ func main() {
 			r.Post("/stamp/in", stampHandler.StampIn)
 			r.Post("/stamp/out", stampHandler.StampOut)
 			r.Post("/stamp/break", stampHandler.ToggleBreak)
+			r.Delete("/stamp/active", stampHandler.Discard)
 		})
 
 		// Team leader routes (team-scoped access — all have {teamID} in URL)
@@ -164,6 +165,7 @@ func main() {
 			r.Get("/absences/team/{teamID}", absenceHandler.ListByTeam)
 			r.Get("/absences/team/{teamID}/pending", absenceHandler.ListPending)
 			r.Get("/teams/{teamID}/availability", overtimeHandler.TeamAvailability)
+			r.Get("/overtime/team/{teamID}", overtimeHandler.TeamOvertimeSummary)
 		})
 
 		// Absence review — accessible to admins and team leaders; handler checks team membership.
@@ -203,6 +205,9 @@ func main() {
 
 			// Work schedule management
 			r.Put("/work-schedules", overtimeHandler.UpsertSchedule)
+
+			// Overtime overview (all users)
+			r.Get("/overtime", overtimeHandler.AdminOvertimeSummary)
 		})
 	})
 

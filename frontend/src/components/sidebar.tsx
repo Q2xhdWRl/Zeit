@@ -27,7 +27,7 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Startseite", icon: LayoutDashboard },
   { href: "/time", label: "Zeiterfassung", icon: Clock },
   { href: "/absences", label: "Abwesenheiten", icon: CalendarDays },
   { href: "/team", label: "Team", icon: Users },

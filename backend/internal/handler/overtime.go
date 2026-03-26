@@ -167,6 +167,48 @@ func (h *OvertimeHandler) UpsertSchedule(w http.ResponseWriter, r *http.Request)
 	JSON(w, http.StatusOK, schedule)
 }
 
+// TeamOvertimeSummary handles GET /api/overtime/team/{teamID}.
+func (h *OvertimeHandler) TeamOvertimeSummary(w http.ResponseWriter, r *http.Request) {
+	teamID, err := uuid.Parse(chi.URLParam(r, "teamID"))
+	if err != nil {
+		ErrorJSON(w, http.StatusBadRequest, "invalid team ID")
+		return
+	}
+
+	from, to, err := parseOvertimeDateRange(r)
+	if err != nil {
+		ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	summaries, err := h.svc.GetTeamOvertimeSummaries(r.Context(), teamID, from, to)
+	if err != nil {
+		log.Error().Err(err).Str("team_id", teamID.String()).Msg("failed to get team overtime summaries")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to get team overtime summaries")
+		return
+	}
+
+	JSON(w, http.StatusOK, summaries)
+}
+
+// AdminOvertimeSummary handles GET /api/admin/overtime.
+func (h *OvertimeHandler) AdminOvertimeSummary(w http.ResponseWriter, r *http.Request) {
+	from, to, err := parseOvertimeDateRange(r)
+	if err != nil {
+		ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	summaries, err := h.svc.GetAllUsersOvertimeSummaries(r.Context(), from, to)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get all users overtime summaries")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to get overtime summaries")
+		return
+	}
+
+	JSON(w, http.StatusOK, summaries)
+}
+
 func parseOvertimeDateRange(r *http.Request) (time.Time, time.Time, error) {
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")

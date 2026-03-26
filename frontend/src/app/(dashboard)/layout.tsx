@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { fetchCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/sidebar";
 import { GlowProvider } from "@/components/glow-provider";
+import { StampFab } from "@/components/stamp-fab";
 
 export default async function DashboardLayout({
   children,
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
         </header>
         <div className="p-6">{children}</div>
       </main>
+      <StampFab />
     </div>
   );
 }

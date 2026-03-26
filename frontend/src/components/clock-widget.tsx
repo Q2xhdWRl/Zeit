@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ActiveStamp } from "@/lib/api";
-import { fetchActiveStamp, stampIn, stampOut, toggleBreak } from "@/lib/api";
+import { fetchActiveStamp, stampIn, stampOut, toggleBreak, discardStamp } from "@/lib/api";
 
 function formatDuration(
   startedAt: string,
@@ -99,6 +99,20 @@ export default function ClockWidget() {
     }
   }
 
+  async function handleDiscard() {
+    if (!window.confirm("Stempel verwerfen? Es wird kein Zeiteintrag erstellt.")) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await discardStamp();
+      setStamp(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Fehler beim Verwerfen");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleToggleBreak() {
     setLoading(true);
     setError(null);
@@ -185,6 +199,16 @@ export default function ClockWidget() {
       )}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
+
+      {stamp && (
+        <button
+          onClick={handleDiscard}
+          disabled={loading}
+          className="w-full text-xs text-gray-500 hover:text-red-400 transition-colors mt-1 disabled:opacity-50"
+        >
+          Stempel verwerfen
+        </button>
+      )}
     </div>
   );
 }

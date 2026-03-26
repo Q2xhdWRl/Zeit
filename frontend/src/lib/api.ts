@@ -358,6 +358,33 @@ export function toggleBreak(): Promise<ActiveStamp> {
   return apiFetch("/stamp/break", { method: "POST" });
 }
 
+export function discardStamp(): Promise<{ status: string }> {
+  return apiFetch("/stamp/active", { method: "DELETE" });
+}
+
+// ── Overtime: Team & Admin views ──
+
+export interface UserOvertimeSummary {
+  user_id: string;
+  display_name: string;
+  summary: OvertimeSummary;
+}
+
+export function fetchTeamOvertimeSummary(
+  teamId: string,
+  from: string,
+  to: string,
+): Promise<UserOvertimeSummary[]> {
+  return apiFetch(`/overtime/team/${teamId}?from=${from}&to=${to}`);
+}
+
+export function fetchAdminOvertimeSummary(
+  from: string,
+  to: string,
+): Promise<UserOvertimeSummary[]> {
+  return apiFetch(`/admin/overtime?from=${from}&to=${to}`);
+}
+
 export function upsertWorkSchedule(data: {
   user_id: string;
   valid_from: string;

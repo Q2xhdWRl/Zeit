@@ -5,8 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
-import type { OvertimeSummary } from "@/lib/auth";
-import { fetchOvertimeSummary, fetchOvertimeTrend } from "@/lib/api";
+import type { OvertimeSummary, TeamMember } from "@/lib/auth";
+import {
+  fetchOvertimeSummary,
+  fetchOvertimeTrend,
+  fetchMyTeams,
+  fetchTeamOvertimeSummary,
+  fetchAdminOvertimeSummary,
+  fetchMe,
+  type UserOvertimeSummary,
+} from "@/lib/api";
+import { isAdmin, isTeamLeaderOrAdmin } from "@/lib/rbac";
 
 function formatMinutes(m: number): string {
   const sign = m < 0 ? "-" : "+";
@@ -36,6 +45,10 @@ export default function OvertimePage() {
   const [trend, setTrend] = useState<OvertimeSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Team / admin breakdown
+  const [teamSummaries, setTeamSummaries] = useState<UserOvertimeSummary[]>([]);
+  const [showTeam, setShowTeam] = useState(false);
+
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
   const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 
@@ -61,6 +74,29 @@ export default function OvertimePage() {
       .then((data) => setTrend(data ?? []))
       .catch(() => {});
   }, []);
+
+  // Load team / admin overtime breakdown when month changes
+  useEffect(() => {
+    const from = monthStart.toISOString().slice(0, 10);
+    const to = monthEnd.toISOString().slice(0, 10);
+
+    fetchMe()
+      .then(async (user) => {
+        if (isAdmin(user)) {
+          const data = await fetchAdminOvertimeSummary(from, to);
+          setTeamSummaries(data ?? []);
+          setShowTeam(true);
+        } else if (isTeamLeaderOrAdmin(user)) {
+          const memberships = await fetchMyTeams();
+          if (memberships.length > 0) {
+            const data = await fetchTeamOvertimeSummary(memberships[0].team_id, from, to);
+            setTeamSummaries(data ?? []);
+            setShowTeam(true);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [monthStart.getTime(), monthEnd.getTime()]);
 
   function prevMonth() {
     setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1));
@@ -199,6 +235,45 @@ export default function OvertimePage() {
                   </div>
                 );
               })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Team / admin overtime breakdown */}
+      {showTeam && teamSummaries.length > 0 && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="text-base">Team-Ueberstunden</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {[...teamSummaries]
+                .sort((a, b) => b.summary.diff_minutes - a.summary.diff_minutes)
+                .map((u) => {
+                  const positive = u.summary.diff_minutes >= 0;
+                  return (
+                    <div
+                      key={u.user_id}
+                      className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 rounded-lg border border-border/40 px-4 py-2.5"
+                    >
+                      <span className="text-sm font-medium truncate">{u.display_name}</span>
+                      <span className="text-xs text-muted-foreground text-right">
+                        Soll: {formatHours(u.summary.target_minutes)} h
+                      </span>
+                      <span className="text-xs text-muted-foreground text-right">
+                        Ist: {formatHours(u.summary.actual_minutes)} h
+                      </span>
+                      <span
+                        className={`text-sm font-mono font-medium text-right ${
+                          positive ? "text-green-400" : "text-red-400"
+                        }`}
+                      >
+                        {formatMinutes(u.summary.diff_minutes)}
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           </CardContent>
         </Card>

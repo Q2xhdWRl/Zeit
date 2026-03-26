@@ -309,3 +309,61 @@ func (s *OvertimeService) GetDashboardStats(ctx context.Context, userID uuid.UUI
 
 	return stats, nil
 }
+
+// UserOvertimeSummary pairs a user's display info with their overtime summary.
+type UserOvertimeSummary struct {
+	UserID      uuid.UUID            `json:"user_id"`
+	DisplayName string               `json:"display_name"`
+	Summary     *model.OvertimeSummary `json:"summary"`
+}
+
+// GetTeamOvertimeSummaries returns overtime for every member of the given team.
+func (s *OvertimeService) GetTeamOvertimeSummaries(ctx context.Context, teamID uuid.UUID, from, to time.Time) ([]UserOvertimeSummary, error) {
+	members, err := s.teamRepo.ListMembers(ctx, teamID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list team members: %w", err)
+	}
+
+	result := make([]UserOvertimeSummary, 0, len(members))
+	for _, m := range members {
+		user, err := s.userRepo.FindByID(ctx, m.UserID)
+		if err != nil || user == nil {
+			continue
+		}
+		summary, err := s.GetOvertimeSummary(ctx, m.UserID, from, to)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get overtime for user %s: %w", m.UserID, err)
+		}
+		result = append(result, UserOvertimeSummary{
+			UserID:      m.UserID,
+			DisplayName: user.DisplayName,
+			Summary:     summary,
+		})
+	}
+	return result, nil
+}
+
+// GetAllUsersOvertimeSummaries returns overtime for every active user (admin use).
+func (s *OvertimeService) GetAllUsersOvertimeSummaries(ctx context.Context, from, to time.Time) ([]UserOvertimeSummary, error) {
+	users, err := s.userRepo.ListAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list users: %w", err)
+	}
+
+	result := make([]UserOvertimeSummary, 0, len(users))
+	for _, u := range users {
+		if !u.IsActive {
+			continue
+		}
+		summary, err := s.GetOvertimeSummary(ctx, u.ID, from, to)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get overtime for user %s: %w", u.ID, err)
+		}
+		result = append(result, UserOvertimeSummary{
+			UserID:      u.ID,
+			DisplayName: u.DisplayName,
+			Summary:     summary,
+		})
+	}
+	return result, nil
+}

@@ -154,6 +154,31 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 	JSON(w, http.StatusOK, map[string]any{"entry": entry, "warnings": violations})
 }
 
+// Discard handles DELETE /api/stamp/active — abandons the active stamp without creating a time entry.
+func (h *StampHandler) Discard(w http.ResponseWriter, r *http.Request) {
+	user := middleware.UserFromContext(r.Context())
+
+	stamp, err := h.stampRepo.GetActive(r.Context(), user.ID)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to check active stamp")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to check stamp")
+		return
+	}
+	if stamp == nil {
+		ErrorJSON(w, http.StatusConflict, "not stamped in")
+		return
+	}
+
+	if err := h.stampRepo.Delete(r.Context(), user.ID); err != nil {
+		log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to discard stamp")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to discard stamp")
+		return
+	}
+
+	log.Info().Str("user_id", user.ID.String()).Msg("stamp discarded")
+	JSON(w, http.StatusOK, map[string]string{"status": "discarded"})
+}
+
 // ToggleBreak handles POST /api/stamp/break.
 // Starts a break if none is active, or ends the current break.
 func (h *StampHandler) ToggleBreak(w http.ResponseWriter, r *http.Request) {
