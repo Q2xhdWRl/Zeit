@@ -185,7 +185,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="glass-card overflow-hidden">
+        <Card className="glass-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

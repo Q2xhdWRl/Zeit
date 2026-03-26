@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CalendarDays, Users, TrendingUp, CalendarOff } from "lucide-react";
+import { Clock, CalendarDays, Users, TrendingUp } from "lucide-react";
 import type { DashboardStats } from "@/lib/auth";
 import { fetchDashboardStats, fetchVacationBalance } from "@/lib/api";
 import ClockWidget from "@/components/clock-widget";
-import { GlowCard } from "@/components/ui/spotlight-card";
 
 function formatMinutes(m: number): string {
   const h = Math.floor(Math.abs(m) / 60);
@@ -136,31 +135,6 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-6">
-        <GlowCard glowColor="blue" size="sm" className="bg-black/30">
-          <div className="flex flex-col items-center justify-center gap-2 text-center">
-            <Clock className="size-8 text-cyan-400" />
-            <span className="font-heading text-sm font-semibold text-white">Zeiterfassung</span>
-            <span className="text-xs text-gray-400">Stunden buchen</span>
-          </div>
-        </GlowCard>
-
-        <GlowCard glowColor="purple" size="sm" className="bg-black/30">
-          <div className="flex flex-col items-center justify-center gap-2 text-center">
-            <CalendarOff className="size-8 text-violet-400" />
-            <span className="font-heading text-sm font-semibold text-white">Abwesenheit</span>
-            <span className="text-xs text-gray-400">Urlaub & Krankmeldung</span>
-          </div>
-        </GlowCard>
-
-        <GlowCard glowColor="green" size="sm" className="bg-black/30">
-          <div className="flex flex-col items-center justify-center gap-2 text-center">
-            <Users className="size-8 text-emerald-400" />
-            <span className="font-heading text-sm font-semibold text-white">Team</span>
-            <span className="text-xs text-gray-400">Teammitglieder</span>
-          </div>
-        </GlowCard>
-      </div>
     </div>
   );
 }

@@ -207,6 +207,41 @@
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    position: relative;
+  }
+
+  .glass-card::before,
+  .glass-card::after {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    background-attachment: fixed;
+    background-size: calc(100% + 2px) calc(100% + 2px);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+    mask-clip: padding-box, border-box;
+    mask-composite: intersect;
+  }
+
+  .glass-card::before {
+    background-image: radial-gradient(
+      200px 200px at calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+      hsl(calc(200 + var(--xp, 0) * 60) 100% 60% / 0.9),
+      transparent 100%
+    );
+    filter: brightness(2);
+  }
+
+  .glass-card::after {
+    background-image: radial-gradient(
+      100px 100px at calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+      hsl(0 100% 100% / 0.6),
+      transparent 100%
+    );
   }
 
   /* --- Neon Text Glow --- */

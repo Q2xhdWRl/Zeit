@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { fetchCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/sidebar";
+import { GlowProvider } from "@/components/glow-provider";
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
+      <GlowProvider />
       <Sidebar user={user} />
 
       <main className="flex-1 pt-14 lg:pt-0">
