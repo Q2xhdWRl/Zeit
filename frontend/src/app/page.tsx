@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import NeuralBackground from "@/components/ui/flow-field-background";
 import { Clock, Users, CalendarDays, TrendingUp } from "lucide-react";
 
 function FeatureCard({
@@ -32,14 +33,14 @@ function FeatureCard({
 export default function LandingPage() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-      {/* Background gradient effect */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        <div className="absolute -top-1/2 left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 blur-[120px]" />
-        <div className="absolute -bottom-1/4 -right-1/4 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[100px]" />
-        <div className="absolute -left-1/4 top-1/4 h-[400px] w-[400px] rounded-full bg-neon-magenta/5 blur-[80px]" />
+      {/* Animated flow-field background */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <NeuralBackground
+          color="#00d4ff"
+          trailOpacity={0.08}
+          speed={0.8}
+          particleCount={600}
+        />
       </div>
 
       {/* Content */}

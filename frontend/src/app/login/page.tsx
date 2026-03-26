@@ -7,19 +7,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import NeuralBackground from "@/components/ui/flow-field-background";
+
+const DEV_USERS = [
+  { label: "Admin (Anna Admin)", token: "dev-admin-token", role: "admin" },
+  { label: "Teamleiter (Lars Leiter)", token: "dev-leader-token", role: "team_leader" },
+  { label: "Benutzer (Udo User)", token: "dev-user-token", role: "user" },
+];
 
 export default function LoginPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+  const isDev = process.env.NODE_ENV === "development" || apiUrl.includes("localhost");
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-      {/* Background gradient effect */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        <div className="absolute -top-1/2 left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 blur-[120px]" />
-        <div className="absolute -bottom-1/4 -right-1/4 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[100px]" />
+      {/* Animated flow-field background */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <NeuralBackground
+          color="#00d4ff"
+          trailOpacity={0.08}
+          speed={0.8}
+          particleCount={600}
+        />
       </div>
 
       {/* Login Card */}
@@ -65,6 +74,53 @@ export default function LoginPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Dev-only quick login buttons */}
+        {isDev && (
+          <Card className="glass-card w-full border-amber-500/20">
+            <CardHeader className="pb-2 text-center">
+              <CardTitle className="flex items-center justify-center gap-2 text-sm font-medium text-amber-400">
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-400">
+                  DEV
+                </Badge>
+                Schnellanmeldung
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              {DEV_USERS.map((user) => (
+                <a
+                  key={user.token}
+                  href={`${apiUrl}/auth/dev-login?token=${user.token}`}
+                  className="w-full"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start border-border/50 text-sm"
+                  >
+                    <Badge
+                      variant={
+                        user.role === "admin"
+                          ? "default"
+                          : user.role === "team_leader"
+                            ? "secondary"
+                            : "outline"
+                      }
+                      className="mr-2 text-[10px]"
+                    >
+                      {user.role === "admin"
+                        ? "Admin"
+                        : user.role === "team_leader"
+                          ? "TL"
+                          : "User"}
+                    </Badge>
+                    {user.label}
+                  </Button>
+                </a>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </main>
   );

@@ -143,6 +143,39 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	JSON(w, http.StatusOK, map[string]string{"status": "logged_out"})
 }
 
+// DevLogin sets a session cookie from a known dev token and redirects to the frontend.
+// This endpoint must ONLY be registered in development mode.
+func (h *AuthHandler) DevLogin(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		ErrorJSON(w, http.StatusBadRequest, "token parameter required")
+		return
+	}
+
+	// Only allow known dev tokens as an extra safety measure.
+	allowed := map[string]bool{
+		"dev-admin-token":  true,
+		"dev-leader-token": true,
+		"dev-user-token":   true,
+	}
+	if !allowed[token] {
+		ErrorJSON(w, http.StatusForbidden, "unknown dev token")
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     sessionCookieName,
+		Value:    token,
+		Path:     "/",
+		MaxAge:   int(h.cfg.SessionMaxAge / time.Second),
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false, // dev only
+	})
+
+	http.Redirect(w, r, h.cfg.FrontendURL+"/dashboard", http.StatusTemporaryRedirect)
+}
+
 // generateState creates a random state parameter for CSRF protection in OIDC.
 func generateState() (string, error) {
 	bytes := make([]byte, 16)

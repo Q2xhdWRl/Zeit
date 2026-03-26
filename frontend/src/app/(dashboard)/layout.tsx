@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { fetchCurrentUser } from "@/lib/auth";
+import Sidebar from "@/components/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -24,27 +25,23 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar placeholder — will be built in Phase 3 */}
-      <aside className="hidden w-64 border-r border-border bg-sidebar lg:block">
-        <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-          <span className="font-heading text-lg font-bold text-glow-cyan text-primary">
-            Zeit
-          </span>
-        </div>
-        <nav className="flex flex-col gap-1 p-4">
-          <span className="px-3 py-2 text-sm text-sidebar-foreground">
-            {user.display_name}
-          </span>
-        </nav>
-      </aside>
+      <Sidebar user={user} />
 
-      {/* Main content */}
       <main className="flex-1">
         <header className="flex h-16 items-center justify-between border-b border-border px-6">
-          <h2 className="font-heading text-lg font-semibold">Dashboard</h2>
-          <span className="text-sm text-muted-foreground">
-            {user.email}
-          </span>
+          <h2 className="font-heading text-lg font-semibold">NEWA Zeiterfassung</h2>
+          <div className="flex items-center gap-3">
+            <span className="text-xs rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-primary">
+              {user.global_role === "admin"
+                ? "Admin"
+                : user.global_role === "team_leader"
+                  ? "Teamleiter"
+                  : "Benutzer"}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {user.email}
+            </span>
+          </div>
         </header>
         <div className="p-6">{children}</div>
       </main>

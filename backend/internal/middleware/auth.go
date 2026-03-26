@@ -41,3 +41,8 @@ func UserFromContext(ctx context.Context) *model.User {
 	user, _ := ctx.Value(userContextKey).(*model.User)
 	return user
 }
+
+// ContextWithUser injects a user into a context. Intended for testing.
+func ContextWithUser(ctx context.Context, user *model.User) context.Context {
+	return context.WithValue(ctx, userContextKey, user)
+}

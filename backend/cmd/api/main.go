@@ -17,8 +17,10 @@ import (
 	"github.com/newa/zeiterfassung/internal/database"
 	"github.com/newa/zeiterfassung/internal/handler"
 	"github.com/newa/zeiterfassung/internal/middleware"
+	"github.com/newa/zeiterfassung/internal/model"
 	"github.com/newa/zeiterfassung/internal/repository"
 	"github.com/newa/zeiterfassung/internal/service"
+	"github.com/newa/zeiterfassung/migrations"
 )
 
 func main() {
@@ -43,12 +45,43 @@ func main() {
 	}
 	defer db.Close()
 
+	// Auto-migrate: run all pending .up.sql migrations.
+	if err := database.Migrate(db, migrations.FS); err != nil {
+		log.Fatal().Err(err).Msg("failed to run migrations")
+	}
+
+	// Dev seed: populate test data in development mode.
+	if cfg.Env == "development" && os.Getenv("DEV_SEED") == "true" {
+		if err := database.Seed(db, migrations.DevSeedSQL); err != nil {
+			log.Warn().Err(err).Msg("dev seed failed (may already be applied)")
+		}
+	}
+
 	healthHandler := handler.NewHealthHandler(db)
 
 	userRepo := repository.NewUserRepository(db)
 	sessionRepo := repository.NewSessionRepository(db)
+	teamRepo := repository.NewTeamRepository(db)
+	timeEntryRepo := repository.NewTimeEntryRepository(db)
+	projectRepo := repository.NewProjectRepository(db)
+
+	absenceRepo := repository.NewAbsenceRepository(db)
+	scheduleRepo := repository.NewWorkScheduleRepository(db)
+	stampRepo := repository.NewStampRepository(db)
+
 	authService := service.NewAuthService(cfg, userRepo, sessionRepo)
+	timeEntryService := service.NewTimeEntryService(timeEntryRepo, projectRepo)
+	absenceService := service.NewAbsenceService(absenceRepo)
+	overtimeService := service.NewOvertimeService(scheduleRepo, timeEntryRepo, absenceRepo, teamRepo, userRepo)
+
 	authHandler := handler.NewAuthHandler(authService, cfg)
+	adminHandler := handler.NewAdminHandler(userRepo)
+	teamHandler := handler.NewTeamHandler(teamRepo)
+	timeEntryHandler := handler.NewTimeEntryHandler(timeEntryService, timeEntryRepo)
+	projectHandler := handler.NewProjectHandler(projectRepo)
+	absenceHandler := handler.NewAbsenceHandler(absenceService, absenceRepo)
+	overtimeHandler := handler.NewOvertimeHandler(overtimeService, scheduleRepo)
+	stampHandler := handler.NewStampHandler(stampRepo, timeEntryService)
 
 	r := chi.NewRouter()
 
@@ -64,12 +97,103 @@ func main() {
 			r.Get("/login", authHandler.Login)
 			r.Get("/callback", authHandler.Callback)
 			r.Post("/logout", authHandler.Logout)
+
+			// Dev-only: quick login with pre-seeded tokens (never available in production).
+			if cfg.Env == "development" {
+				r.Get("/dev-login", authHandler.DevLogin)
+			}
 		})
 
-		// Protected routes
+		// Protected routes (any authenticated user)
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(authService))
 			r.Get("/auth/me", authHandler.Me)
+			r.Get("/teams", teamHandler.ListTeams)
+			r.Get("/teams/my", teamHandler.MyTeams)
+			r.Get("/teams/{teamID}", teamHandler.GetTeam)
+			r.Get("/teams/{teamID}/members", teamHandler.ListMembers)
+
+			// Time entries (own)
+			r.Post("/time-entries", timeEntryHandler.Create)
+			r.Get("/time-entries", timeEntryHandler.ListMy)
+			r.Get("/time-entries/summary", timeEntryHandler.Summary)
+			r.Put("/time-entries/{entryID}", timeEntryHandler.Update)
+			r.Delete("/time-entries/{entryID}", timeEntryHandler.Delete)
+
+			// Projects (active only for regular users)
+			r.Get("/projects", projectHandler.List)
+
+			// Absences (own)
+			r.Post("/absences", absenceHandler.Create)
+			r.Get("/absences", absenceHandler.ListMy)
+			r.Get("/absences/balance", absenceHandler.VacationBalance)
+			r.Put("/absences/{absenceID}", absenceHandler.Update)
+			r.Delete("/absences/{absenceID}", absenceHandler.Delete)
+			r.Post("/absences/{absenceID}/cancel", absenceHandler.Cancel)
+
+			// Absence types (active only)
+			r.Get("/absence-types", absenceHandler.ListAbsenceTypes)
+
+			// Overtime & Dashboard
+			r.Get("/overtime", overtimeHandler.OvertimeSummary)
+			r.Get("/overtime/trend", overtimeHandler.OvertimeTrend)
+			r.Get("/dashboard", overtimeHandler.Dashboard)
+			r.Get("/work-schedule", overtimeHandler.GetSchedule)
+
+			// Stempeluhr
+			r.Get("/stamp/active", stampHandler.GetActive)
+			r.Post("/stamp/in", stampHandler.StampIn)
+			r.Post("/stamp/out", stampHandler.StampOut)
+			r.Post("/stamp/break", stampHandler.ToggleBreak)
+		})
+
+		// Team leader routes (team-scoped access)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Use(middleware.RequireTeamAccess(teamRepo))
+			r.Post("/teams/{teamID}/members", teamHandler.AddMember)
+			r.Delete("/teams/{teamID}/members/{userID}", teamHandler.RemoveMember)
+			r.Get("/time-entries/team/{teamID}", timeEntryHandler.ListByTeam)
+
+			// Team absences (team leader view)
+			r.Get("/absences/team/{teamID}", absenceHandler.ListByTeam)
+			r.Get("/absences/team/{teamID}/pending", absenceHandler.ListPending)
+			r.Put("/absences/{absenceID}/review", absenceHandler.Review)
+
+			// Team availability
+			r.Get("/teams/{teamID}/availability", overtimeHandler.TeamAvailability)
+		})
+
+		// Admin-only routes
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Use(middleware.RequireRole(model.RoleAdmin))
+
+			// User management
+			r.Get("/users", adminHandler.ListUsers)
+			r.Get("/users/{userID}", adminHandler.GetUser)
+			r.Put("/users/{userID}/role", adminHandler.UpdateRole)
+			r.Put("/users/{userID}/active", adminHandler.UpdateActive)
+
+			// Team management (create/update/delete)
+			r.Post("/teams", teamHandler.CreateTeam)
+			r.Put("/teams/{teamID}", teamHandler.UpdateTeam)
+			r.Delete("/teams/{teamID}", teamHandler.DeleteTeam)
+
+			// Project management
+			r.Get("/projects", projectHandler.ListAll)
+			r.Post("/projects", projectHandler.Create)
+			r.Put("/projects/{projectID}", projectHandler.Update)
+
+			// Absence type management
+			r.Get("/absence-types", absenceHandler.ListAllAbsenceTypes)
+			r.Put("/absence-types/{typeID}", absenceHandler.UpdateAbsenceType)
+
+			// Vacation entitlement management
+			r.Put("/entitlements", absenceHandler.UpsertEntitlement)
+
+			// Work schedule management
+			r.Put("/work-schedules", overtimeHandler.UpsertSchedule)
 		})
 	})
 

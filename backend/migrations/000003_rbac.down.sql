@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS team_members;
+DROP TABLE IF EXISTS teams;
+ALTER TABLE users DROP COLUMN IF EXISTS global_role;
+DROP TYPE IF EXISTS user_role;
