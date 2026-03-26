@@ -67,22 +67,31 @@ VALUES
   ('c0000000-0000-0000-0000-000000000003', 'Altsystem', 'Intern', false)
 ON CONFLICT (name) DO NOTHING;
 
--- ── Zeiteintraege (aktuelle Woche fuer alle 3 User) ──
+-- ── Zeiteintraege bereinigen (idempotent) ──
 
--- Montag dieser Woche berechnen
+DELETE FROM time_entries WHERE user_id IN (
+  'a0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000002',
+  'a0000000-0000-0000-0000-000000000003'
+);
+
+-- ── Zeiteintraege (aktuelle + letzte Woche fuer alle 3 User) ──
+
+-- Montag dieser und letzter Woche berechnen
 DO $$
 DECLARE
-  mon DATE := date_trunc('week', CURRENT_DATE)::DATE;
+  mon      DATE := date_trunc('week', CURRENT_DATE)::DATE;
+  last_mon DATE := date_trunc('week', CURRENT_DATE)::DATE - 7;
 BEGIN
 
-  -- Admin: Mo-Fr
+  -- ── Aktuelle Woche ──
+
+  -- Admin: Mo-Mi (Do+Fr frei fuer manuelles Testen)
   INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
   VALUES
     ('a0000000-0000-0000-0000-000000000001', mon,     '08:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Backend-Entwicklung'),
     ('a0000000-0000-0000-0000-000000000001', mon + 1, '08:30', '17:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Code Review'),
-    ('a0000000-0000-0000-0000-000000000001', mon + 2, '07:30', '16:00', 45, 'c0000000-0000-0000-0000-000000000002', 'Kundenmeeting + Entwicklung'),
-    ('a0000000-0000-0000-0000-000000000001', mon + 3, '09:00', '18:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Feature-Entwicklung'),
-    ('a0000000-0000-0000-0000-000000000001', mon + 4, '08:00', '14:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Freitag kurzer Tag');
+    ('a0000000-0000-0000-0000-000000000001', mon + 2, '07:30', '16:00', 45, 'c0000000-0000-0000-0000-000000000002', 'Kundenmeeting + Entwicklung');
 
   -- Teamleiter: Mo-Mi
   INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
@@ -96,6 +105,17 @@ BEGIN
   VALUES
     ('a0000000-0000-0000-0000-000000000003', mon,     '08:00', '16:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Frontend-Arbeit'),
     ('a0000000-0000-0000-0000-000000000003', mon + 1, '09:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Bugfixes');
+
+  -- ── Letzte Woche (fuer "Letzte Woche"-Ansicht) ──
+
+  -- Admin: Mo-Fr letzte Woche
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000001', last_mon,     '08:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Backend-Entwicklung'),
+    ('a0000000-0000-0000-0000-000000000001', last_mon + 1, '08:30', '17:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Code Review'),
+    ('a0000000-0000-0000-0000-000000000001', last_mon + 2, '07:45', '16:30', 45, 'c0000000-0000-0000-0000-000000000001', 'Refactoring'),
+    ('a0000000-0000-0000-0000-000000000001', last_mon + 3, '09:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Feature-Entwicklung'),
+    ('a0000000-0000-0000-0000-000000000001', last_mon + 4, '08:00', '13:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Freitag kurzer Tag');
 
 END $$;
 
