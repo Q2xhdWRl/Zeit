@@ -184,5 +184,5 @@ export function getLoginUrl(): string {
 
 /** Returns the logout URL. */
 export function getLogoutUrl(): string {
-  return `${API_URL}/auth/logout`;
+  return "/api/auth/logout";
 }

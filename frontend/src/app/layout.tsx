@@ -33,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="de"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} ${jetbrainsMono.variable} dark h-full antialiased bg-background`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col text-foreground">
         {children}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { fetchCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/sidebar";
 import { GlowProvider } from "@/components/glow-provider";
 import { StampFab } from "@/components/stamp-fab";
+import { GradientBackground } from "@/components/ui/gradient-background";
 
 export default async function DashboardLayout({
   children,
@@ -28,6 +29,9 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       <GlowProvider />
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <GradientBackground />
+      </div>
       <Sidebar user={user} />
 
       <main className="flex-1 pt-14 lg:pt-0">
