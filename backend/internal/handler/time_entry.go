@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -237,6 +238,12 @@ func parseDateRange(r *http.Request) (time.Time, time.Time, error) {
 	to, err := time.Parse("2006-01-02", toStr)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
+	}
+	if to.Before(from) {
+		return time.Time{}, time.Time{}, fmt.Errorf("to must be on or after from")
+	}
+	if to.Sub(from) > 366*24*time.Hour {
+		return time.Time{}, time.Time{}, fmt.Errorf("date range cannot exceed 366 days")
 	}
 	return from, to, nil
 }

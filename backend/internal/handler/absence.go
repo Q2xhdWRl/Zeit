@@ -19,11 +19,12 @@ import (
 type AbsenceHandler struct {
 	svc         *service.AbsenceService
 	absenceRepo *repository.AbsenceRepository
+	teamRepo    *repository.TeamRepository
 }
 
 // NewAbsenceHandler creates a new AbsenceHandler.
-func NewAbsenceHandler(svc *service.AbsenceService, absenceRepo *repository.AbsenceRepository) *AbsenceHandler {
-	return &AbsenceHandler{svc: svc, absenceRepo: absenceRepo}
+func NewAbsenceHandler(svc *service.AbsenceService, absenceRepo *repository.AbsenceRepository, teamRepo *repository.TeamRepository) *AbsenceHandler {
+	return &AbsenceHandler{svc: svc, absenceRepo: absenceRepo, teamRepo: teamRepo}
 }
 
 type createAbsenceRequest struct {
@@ -222,6 +223,30 @@ func (h *AbsenceHandler) Review(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrorJSON(w, http.StatusBadRequest, "invalid request body")
 		return
+	}
+
+	// Non-admin team leaders may only review absences of users in their own teams.
+	if !user.IsAdmin() {
+		existing, err := h.absenceRepo.FindByID(r.Context(), absenceID)
+		if err != nil {
+			log.Error().Err(err).Str("absence_id", absenceID.String()).Msg("failed to find absence for auth check")
+			ErrorJSON(w, http.StatusInternalServerError, "authorization check failed")
+			return
+		}
+		if existing == nil {
+			ErrorJSON(w, http.StatusNotFound, "absence not found")
+			return
+		}
+		isLeader, err := h.teamRepo.IsTeamLeaderOfUser(r.Context(), user.ID, existing.UserID)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to check team leadership")
+			ErrorJSON(w, http.StatusInternalServerError, "authorization check failed")
+			return
+		}
+		if !isLeader {
+			ErrorJSON(w, http.StatusForbidden, "insufficient team permissions")
+			return
+		}
 	}
 
 	absence, err := h.svc.Review(r.Context(), service.ReviewInput{

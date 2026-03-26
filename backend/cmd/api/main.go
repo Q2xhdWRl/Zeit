@@ -75,11 +75,11 @@ func main() {
 	overtimeService := service.NewOvertimeService(scheduleRepo, timeEntryRepo, absenceRepo, teamRepo, userRepo)
 
 	authHandler := handler.NewAuthHandler(authService, cfg)
-	adminHandler := handler.NewAdminHandler(userRepo)
+	adminHandler := handler.NewAdminHandler(userRepo, sessionRepo)
 	teamHandler := handler.NewTeamHandler(teamRepo)
 	timeEntryHandler := handler.NewTimeEntryHandler(timeEntryService, timeEntryRepo)
 	projectHandler := handler.NewProjectHandler(projectRepo)
-	absenceHandler := handler.NewAbsenceHandler(absenceService, absenceRepo)
+	absenceHandler := handler.NewAbsenceHandler(absenceService, absenceRepo, teamRepo)
 	overtimeHandler := handler.NewOvertimeHandler(overtimeService, scheduleRepo)
 	stampHandler := handler.NewStampHandler(stampRepo, timeEntryService)
 
@@ -88,6 +88,13 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.CORS(cfg.CORSAllowedURLs))
+	r.Use(middleware.SecurityHeaders)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			req.Body = http.MaxBytesReader(w, req.Body, 1<<20) // 1 MB
+			next.ServeHTTP(w, req)
+		})
+	})
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", healthHandler.Check)
@@ -147,21 +154,23 @@ func main() {
 			r.Post("/stamp/break", stampHandler.ToggleBreak)
 		})
 
-		// Team leader routes (team-scoped access)
+		// Team leader routes (team-scoped access — all have {teamID} in URL)
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(authService))
 			r.Use(middleware.RequireTeamAccess(teamRepo))
 			r.Post("/teams/{teamID}/members", teamHandler.AddMember)
 			r.Delete("/teams/{teamID}/members/{userID}", teamHandler.RemoveMember)
 			r.Get("/time-entries/team/{teamID}", timeEntryHandler.ListByTeam)
-
-			// Team absences (team leader view)
 			r.Get("/absences/team/{teamID}", absenceHandler.ListByTeam)
 			r.Get("/absences/team/{teamID}/pending", absenceHandler.ListPending)
-			r.Put("/absences/{absenceID}/review", absenceHandler.Review)
-
-			// Team availability
 			r.Get("/teams/{teamID}/availability", overtimeHandler.TeamAvailability)
+		})
+
+		// Absence review — accessible to admins and team leaders; handler checks team membership.
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Use(middleware.RequireRole(model.RoleAdmin, model.RoleTeamLeader))
+			r.Put("/absences/{absenceID}/review", absenceHandler.Review)
 		})
 
 		// Admin-only routes

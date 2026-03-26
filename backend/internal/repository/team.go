@@ -185,3 +185,22 @@ func (r *TeamRepository) IsTeamLeader(ctx context.Context, teamID, userID uuid.U
 	}
 	return role == model.RoleTeamLeader || role == model.RoleAdmin, nil
 }
+
+// IsTeamLeaderOfUser checks if leaderID is a team_leader in any team that memberID belongs to.
+// Used to authorize cross-team operations like absence review.
+func (r *TeamRepository) IsTeamLeaderOfUser(ctx context.Context, leaderID, memberID uuid.UUID) (bool, error) {
+	var exists bool
+	err := r.db.QueryRow(ctx,
+		`SELECT EXISTS(
+			SELECT 1 FROM team_members tm_leader
+			JOIN team_members tm_member ON tm_leader.team_id = tm_member.team_id
+			WHERE tm_leader.user_id = $1
+			  AND tm_leader.role IN ('team_leader', 'admin')
+			  AND tm_member.user_id = $2
+		)`, leaderID, memberID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

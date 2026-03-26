@@ -15,12 +15,13 @@ import (
 
 // AdminHandler handles admin-only user management endpoints.
 type AdminHandler struct {
-	userRepo *repository.UserRepository
+	userRepo    *repository.UserRepository
+	sessionRepo *repository.SessionRepository
 }
 
 // NewAdminHandler creates a new AdminHandler.
-func NewAdminHandler(userRepo *repository.UserRepository) *AdminHandler {
-	return &AdminHandler{userRepo: userRepo}
+func NewAdminHandler(userRepo *repository.UserRepository, sessionRepo *repository.SessionRepository) *AdminHandler {
+	return &AdminHandler{userRepo: userRepo, sessionRepo: sessionRepo}
 }
 
 // ListUsers returns all users (admin only).
@@ -130,6 +131,13 @@ func (h *AdminHandler) UpdateActive(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to update active status")
 		ErrorJSON(w, http.StatusInternalServerError, "failed to update active status")
 		return
+	}
+
+	// Invalidate all sessions immediately when a user is deactivated.
+	if !req.Active {
+		if err := h.sessionRepo.DeleteByUserID(r.Context(), userID); err != nil {
+			log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to invalidate sessions after deactivation")
+		}
 	}
 
 	log.Info().
