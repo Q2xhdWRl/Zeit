@@ -6,6 +6,9 @@ http:
         contentTypeNosniff: true
         frameDeny: true
         referrerPolicy: "strict-origin-when-cross-origin"
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        stsPreload: true
         customResponseHeaders:
           X-Powered-By: ""
           Server: ""

@@ -1,0 +1,25 @@
+# Production overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   - APP_HOST must be set to the public domain (e.g. zeit.example.com)
+#   - ACME_EMAIL must be set for Let's Encrypt notifications
+#   - SESSION_SECRET must be a strong random secret (e.g. openssl rand -hex 32)
+#   - All AZURE_* variables must be set for SSO
+#   - DB_PASSWORD must be set
+
+services:
+  backend:
+    environment:
+      APP_ENV: production
+      DEV_SEED: "false"
+      DB_SSLMODE: require
+      SESSION_MAX_AGE: "28800"
+      CORS_ALLOWED_ORIGINS: "https://${APP_HOST}"
+      AZURE_REDIRECT_URL: "https://${APP_HOST}/api/auth/callback"
+      FRONTEND_URL: "https://${APP_HOST}"
+
+  frontend:
+    environment:
+      NEXT_PUBLIC_API_URL: "https://${APP_HOST}/api"
+      NODE_ENV: production

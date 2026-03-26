@@ -27,8 +27,8 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen">
       <Sidebar user={user} />
 
-      <main className="flex-1">
-        <header className="flex h-16 items-center justify-between border-b border-border px-6">
+      <main className="flex-1 pt-14 lg:pt-0">
+        <header className="hidden lg:flex h-16 items-center justify-between border-b border-border px-6">
           <h2 className="font-heading text-lg font-semibold">NEWA Zeiterfassung</h2>
           <div className="flex items-center gap-3">
             <span className="text-xs rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-primary">

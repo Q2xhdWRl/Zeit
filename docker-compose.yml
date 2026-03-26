@@ -2,12 +2,15 @@ services:
   traefik:
     image: traefik:v3.3
     ports:
-      - "8888:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - letsencrypt:/letsencrypt
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
     networks:
       - web
     restart: unless-stopped
@@ -43,8 +46,9 @@ services:
       DB_NAME: ${DB_NAME:-zeiterfassung}
       DB_USER: ${DB_USER:-zeit_app}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
-      DB_SSLMODE: disable
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
       SESSION_SECRET: ${SESSION_SECRET:-dev-secret-change-in-production}
+      SESSION_MAX_AGE: ${SESSION_MAX_AGE:-86400}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3003}
       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
@@ -63,7 +67,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${APP_HOST:-localhost}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backend.middlewares=security-headers@file"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     restart: unless-stopped
 
@@ -83,12 +89,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${APP_HOST:-localhost}`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend.middlewares=security-headers@file"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     restart: unless-stopped
 
 volumes:
   pgdata:
+  letsencrypt:
 
 networks:
   web:
