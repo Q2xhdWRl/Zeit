@@ -50,7 +50,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <a href={`${apiUrl}/auth/login`} className="w-full">
+            <a href={isDev ? `${apiUrl}/auth/dev-login?token=dev-admin-token` : `${apiUrl}/auth/login`} className="w-full">
               <Button
                 size="lg"
                 className="btn-glow w-full font-heading font-semibold"
@@ -66,7 +66,7 @@ export default function LoginPage() {
                   <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
                   <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
                 </svg>
-                Anmelden mit Microsoft
+                {isDev ? "Anmelden (Dev)" : "Anmelden mit Microsoft"}
               </Button>
             </a>
             <p className="text-center text-xs text-muted-foreground">

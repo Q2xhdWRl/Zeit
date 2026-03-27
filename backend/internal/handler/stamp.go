@@ -93,6 +93,7 @@ func (h *StampHandler) StampIn(w http.ResponseWriter, r *http.Request) {
 
 // StampOut handles POST /api/stamp/out.
 // Finalizes the active stamp by creating a time entry and deleting the stamp.
+// Supports midnight-crossing stamps by splitting into two entries.
 func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 	user := middleware.UserFromContext(r.Context())
 	now := time.Now()
@@ -120,29 +121,87 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		stamp.BreakStart = nil
 	}
 
-	startTime := stamp.StartedAt.Format("15:04")
-	endTime := now.Format("15:04")
-	entryDate := stamp.StartedAt.Format("2006-01-02")
+	// Use consistent timezone for both start and end.
+	loc := now.Location()
+	startLocal := stamp.StartedAt.In(loc)
+
+	startHM := startLocal.Format("15:04")
+	endHM := now.Format("15:04")
+	startDate := startLocal.Format("2006-01-02")
+	endDate := now.Format("2006-01-02")
 
 	// Ensure at least 1 minute of work.
-	if startTime == endTime {
+	if startHM == endHM && startDate == endDate {
 		ErrorJSON(w, http.StatusBadRequest, "stamp duration too short")
 		return
 	}
 
-	entry, violations, err := h.entrySvc.Create(r.Context(), service.CreateInput{
-		UserID:       user.ID,
-		EntryDate:    entryDate,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		BreakMinutes: stamp.BreakMinutes,
-		ProjectID:    stamp.ProjectID,
-		Description:  stamp.Description,
-	})
-	if err != nil {
-		log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create time entry from stamp")
-		ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
-		return
+	var lastEntry any
+	var lastViolations any
+
+	if startDate != endDate {
+		// Midnight crossing: split into two entries.
+		midnight := time.Date(startLocal.Year(), startLocal.Month(), startLocal.Day()+1, 0, 0, 0, 0, loc)
+		day1Minutes := int(midnight.Sub(startLocal).Minutes())
+		totalMinutes := int(now.Sub(startLocal).Minutes())
+
+		breakDay1, breakDay2 := stamp.BreakMinutes, 0
+		if totalMinutes > 0 && stamp.BreakMinutes > 0 {
+			breakDay1 = stamp.BreakMinutes * day1Minutes / totalMinutes
+			breakDay2 = stamp.BreakMinutes - breakDay1
+		}
+
+		// Entry for start date: start → 23:59.
+		_, _, err := h.entrySvc.Create(r.Context(), service.CreateInput{
+			UserID:       user.ID,
+			EntryDate:    startDate,
+			StartTime:    startHM,
+			EndTime:      "23:59",
+			BreakMinutes: breakDay1,
+			ProjectID:    stamp.ProjectID,
+			Description:  stamp.Description,
+		})
+		if err != nil {
+			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create day-1 entry from midnight-crossing stamp")
+			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			return
+		}
+
+		// Entry for end date: 00:00 → end.
+		entry2, violations2, err := h.entrySvc.Create(r.Context(), service.CreateInput{
+			UserID:       user.ID,
+			EntryDate:    endDate,
+			StartTime:    "00:00",
+			EndTime:      endHM,
+			BreakMinutes: breakDay2,
+			ProjectID:    stamp.ProjectID,
+			Description:  stamp.Description,
+		})
+		if err != nil {
+			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create day-2 entry from midnight-crossing stamp")
+			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			return
+		}
+		lastEntry = entry2
+		lastViolations = violations2
+	} else {
+		// Same-day stamp: normal entry creation.
+		entry, violations, err := h.entrySvc.Create(r.Context(), service.CreateInput{
+			UserID:       user.ID,
+			EntryDate:    startDate,
+			StartTime:    startHM,
+			EndTime:      endHM,
+			BreakMinutes: stamp.BreakMinutes,
+			ProjectID:    stamp.ProjectID,
+			Description:  stamp.Description,
+		})
+		if err != nil {
+			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create time entry from stamp")
+			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			return
+		}
+		lastEntry = entry
+		lastViolations = violations
 	}
 
 	if err := h.stampRepo.Delete(r.Context(), user.ID); err != nil {
@@ -150,8 +209,8 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		// Non-fatal: entry was already created.
 	}
 
-	log.Info().Str("user_id", user.ID.String()).Str("entry_id", entry.ID.String()).Msg("stamped out")
-	JSON(w, http.StatusOK, map[string]any{"entry": entry, "warnings": violations})
+	log.Info().Str("user_id", user.ID.String()).Msg("stamped out")
+	JSON(w, http.StatusOK, map[string]any{"entry": lastEntry, "warnings": lastViolations})
 }
 
 // Discard handles DELETE /api/stamp/active — abandons the active stamp without creating a time entry.

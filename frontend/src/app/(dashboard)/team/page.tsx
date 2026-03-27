@@ -9,7 +9,7 @@ import type { DayAvailability, TeamMember } from "@/lib/auth";
 import { fetchTeamAvailability, fetchMyTeams } from "@/lib/api";
 
 function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function getMonday(d: Date): Date {
@@ -25,6 +25,13 @@ function addDays(d: Date, n: number): Date {
   const result = new Date(d);
   result.setDate(result.getDate() + n);
   return result;
+}
+
+function isoWeek(d: Date): number {
+  const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - (tmp.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  return Math.ceil(((tmp.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 }
 
 function formatDayHeader(dateStr: string): string {
@@ -131,7 +138,7 @@ export default function TeamPage() {
           >
             {teams.map((t) => (
               <option key={t.team_id} value={t.team_id}>
-                Team {t.team_id.slice(0, 8)}
+                {t.display_name || `Team ${t.team_id.slice(0, 8)}`}
               </option>
             ))}
           </select>
@@ -158,12 +165,7 @@ export default function TeamPage() {
           </Button>
         </div>
         <span className="text-sm text-muted-foreground">
-          KW{" "}
-          {Math.ceil(
-            (weekStart.getTime() -
-              new Date(weekStart.getFullYear(), 0, 1).getTime()) /
-              (7 * 86400000),
-          ) + 1}
+          KW {isoWeek(weekStart)}
         </span>
         <div className="flex gap-3 text-xs">
           {Object.entries(statusConfig).map(([key, cfg]) => (

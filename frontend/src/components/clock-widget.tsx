@@ -128,7 +128,7 @@ export default function ClockWidget() {
 
   if (stamp === undefined) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-gray-400">
+      <div className="rounded-xl border border-white/10 clock-glass p-4 text-sm text-gray-400">
         Laden…
       </div>
     );
@@ -137,7 +137,7 @@ export default function ClockWidget() {
   const onBreak = !!stamp?.break_start;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+    <div className="rounded-xl border border-white/10 clock-glass p-4 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
           Stempeluhr

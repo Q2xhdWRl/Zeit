@@ -131,12 +131,12 @@ export default function Sidebar({ user }: { user: User }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 border-r border-border bg-sidebar lg:flex lg:flex-col">
+      <aside className="hidden w-64 border-r border-border sidebar-glass lg:flex lg:flex-col">
         <SidebarContent user={user} pathname={pathname} />
       </aside>
 
       {/* Mobile: hamburger button (rendered in layout header area via portal-like approach) */}
-      <div className="lg:hidden fixed top-0 left-0 z-50 flex h-14 items-center px-4 border-b border-border bg-sidebar w-full">
+      <div className="lg:hidden fixed top-0 left-0 z-50 flex h-14 items-center px-4 border-b border-border sidebar-glass w-full">
         <button
           onClick={() => setMobileOpen(true)}
           aria-label="Menü öffnen"
@@ -159,7 +159,7 @@ export default function Sidebar({ user }: { user: User }) {
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "lg:hidden fixed top-0 left-0 z-50 flex h-full w-64 flex-col border-r border-border bg-sidebar transition-transform duration-200",
+          "lg:hidden fixed top-0 left-0 z-50 flex h-full w-64 flex-col border-r border-border sidebar-glass transition-transform duration-200",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

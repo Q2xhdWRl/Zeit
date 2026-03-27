@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -380,6 +381,10 @@ func (h *AbsenceHandler) UpsertEntitlement(w http.ResponseWriter, r *http.Reques
 		ErrorJSON(w, http.StatusBadRequest, "total_days must be non-negative")
 		return
 	}
+	if req.CarryOverDays < 0 {
+		ErrorJSON(w, http.StatusBadRequest, "carry_over_days must be non-negative")
+		return
+	}
 
 	entitlement, err := h.absenceRepo.UpsertEntitlement(r.Context(), userID, req.Year, req.TotalDays, req.CarryOverDays)
 	if err != nil {
@@ -410,6 +415,9 @@ func parseAbsenceDateRange(r *http.Request) (time.Time, time.Time, error) {
 	to, err := time.Parse("2006-01-02", toStr)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
+	}
+	if to.Before(from) {
+		return time.Time{}, time.Time{}, fmt.Errorf("to must not be before from")
 	}
 	return from, to, nil
 }

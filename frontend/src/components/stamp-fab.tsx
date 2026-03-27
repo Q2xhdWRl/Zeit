@@ -81,12 +81,12 @@ export function StampFab() {
 
   const onBreak = !!stamp?.break_start;
 
-  // Button colour based on state
+  // Button colour based on state (glass effect with tinted backgrounds)
   const btnClass = stamp
     ? onBreak
-      ? "bg-yellow-600 hover:bg-yellow-500 shadow-yellow-500/30"
-      : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/30"
-    : "bg-cyan-700 hover:bg-cyan-600 shadow-cyan-500/30";
+      ? "bg-yellow-600/70 hover:bg-yellow-500/80 shadow-yellow-500/30 backdrop-blur-md"
+      : "bg-emerald-600/70 hover:bg-emerald-500/80 shadow-emerald-500/30 backdrop-blur-md"
+    : "bg-cyan-700/70 hover:bg-cyan-600/80 shadow-cyan-500/30 backdrop-blur-md";
 
   if (stamp === undefined) return null;
 
@@ -94,7 +94,7 @@ export function StampFab() {
     <div ref={menuRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
       {/* Popover menu */}
       {open && (
-        <div className="mb-1 rounded-xl border border-white/10 bg-[#0d1117] shadow-2xl p-3 w-52 space-y-1">
+        <div className="mb-1 rounded-xl border border-white/10 stamp-popup-glass shadow-2xl p-3 w-52 space-y-1">
           {error && <p className="text-xs text-red-400 pb-1">{error}</p>}
 
           {!stamp && (

@@ -31,6 +31,10 @@ function formatHours(m: number): string {
   return `${h}:${min.toString().padStart(2, "0")}`;
 }
 
+function toDateString(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function monthLabel(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
@@ -55,8 +59,8 @@ export default function OvertimePage() {
   const loadSummary = useCallback(async () => {
     try {
       const data = await fetchOvertimeSummary(
-        monthStart.toISOString().slice(0, 10),
-        monthEnd.toISOString().slice(0, 10),
+        toDateString(monthStart),
+        toDateString(monthEnd),
       );
       setSummary(data);
       setError(null);
@@ -77,8 +81,8 @@ export default function OvertimePage() {
 
   // Load team / admin overtime breakdown when month changes
   useEffect(() => {
-    const from = monthStart.toISOString().slice(0, 10);
-    const to = monthEnd.toISOString().slice(0, 10);
+    const from = toDateString(monthStart);
+    const to = toDateString(monthEnd);
 
     fetchMe()
       .then(async (user) => {

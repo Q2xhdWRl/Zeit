@@ -51,7 +51,17 @@ function getMonday(d: Date): Date {
 }
 
 function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function workingDaysBetween(startStr: string, endStr: string): number {
+  let count = 0;
+  const end = new Date(endStr);
+  for (const d = new Date(startStr); d <= end; d.setDate(d.getDate() + 1)) {
+    const wd = d.getDay();
+    if (wd !== 0 && wd !== 6) count++;
+  }
+  return count;
 }
 
 function addDays(d: Date, n: number): Date {
@@ -254,9 +264,7 @@ function InboxCard({
           pendingAbsences.slice(0, 5).map((a) => {
             const start = new Date(a.start_date);
             const end = new Date(a.end_date);
-            const diff = Math.round(
-              (end.getTime() - start.getTime()) / 86_400_000,
-            ) + 1;
+            const diff = workingDaysBetween(a.start_date, a.end_date);
             return (
               <div
                 key={a.id}

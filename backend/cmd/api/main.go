@@ -219,6 +219,27 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
+	// Background: periodically clean up expired sessions (DSGVO compliance).
+	sessionCleanupCtx, sessionCleanupCancel := context.WithCancel(context.Background())
+	defer sessionCleanupCancel()
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				deleted, err := sessionRepo.DeleteExpired(sessionCleanupCtx)
+				if err != nil {
+					log.Error().Err(err).Msg("session cleanup failed")
+				} else if deleted > 0 {
+					log.Info().Int64("deleted", deleted).Msg("expired sessions cleaned up")
+				}
+			case <-sessionCleanupCtx.Done():
+				return
+			}
+		}
+	}()
+
 	go func() {
 		log.Info().Int("port", cfg.Port).Str("env", cfg.Env).Msg("starting server")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

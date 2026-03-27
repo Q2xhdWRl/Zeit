@@ -244,6 +244,27 @@
     );
   }
 
+  /* --- Sidebar Glass --- */
+  .sidebar-glass {
+    background-color: oklch(0.13 0.015 278 / 75%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* --- ClockWidget Glass --- */
+  .clock-glass {
+    background-color: oklch(1 0 0 / 5%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* --- StampFab Popup Glass --- */
+  .stamp-popup-glass {
+    background-color: oklch(0.11 0.015 280 / 85%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   /* --- Neon Text Glow --- */
   .text-glow-cyan {
     text-shadow: 0 0 10px oklch(0.75 0.15 210 / 60%);
