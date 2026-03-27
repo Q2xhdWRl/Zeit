@@ -61,21 +61,11 @@ export default function LandingPage() {
             <span className="text-muted-foreground">Team im Blick.</span>
           </h1>
 
-          <p className="max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Zeiterfassung, Abwesenheitsverwaltung und Teamuebersicht in einer
-            sicheren Web-App. Einfach im Browser oeffnen und loslegen.
-          </p>
-
-          <div className="flex gap-4">
-            <Link href="/login">
-              <Button size="lg" className="btn-glow font-heading font-semibold">
-                Anmelden mit Microsoft
-              </Button>
-            </Link>
-            <Button variant="outline" size="lg" className="font-heading">
-              Mehr erfahren
+          <Link href="/login">
+            <Button size="lg" className="btn-glow font-heading font-semibold">
+              Anmelden mit Microsoft
             </Button>
-          </div>
+          </Link>
         </div>
 
         {/* Features */}
