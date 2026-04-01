@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/middleware"
 	"github.com/newa/zeiterfassung/internal/repository"
 	"github.com/newa/zeiterfassung/internal/service"
@@ -231,11 +232,11 @@ func parseDateRange(r *http.Request) (time.Time, time.Time, error) {
 		return truncateDate(from), truncateDate(to), nil
 	}
 
-	from, err := time.Parse("2006-01-02", fromStr)
+	from, err := time.ParseInLocation("2006-01-02", fromStr, config.AppLocation)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
-	to, err := time.Parse("2006-01-02", toStr)
+	to, err := time.ParseInLocation("2006-01-02", toStr, config.AppLocation)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}

@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedPaths = ["/dashboard"];
+const protectedPaths = [
+  "/dashboard",
+  "/time",
+  "/absences",
+  "/team",
+  "/overtime",
+  "/admin",
+  "/profile",
+];
 const authPaths = ["/login"];
 
 export function proxy(request: NextRequest) {
@@ -31,5 +39,14 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: [
+    "/dashboard/:path*",
+    "/time/:path*",
+    "/absences/:path*",
+    "/team/:path*",
+    "/overtime/:path*",
+    "/admin/:path*",
+    "/profile/:path*",
+    "/login",
+  ],
 };

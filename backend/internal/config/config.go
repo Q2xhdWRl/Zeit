@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+// AppLocation is the application-wide timezone used for date calculations.
+// Initialized by Load(). Default: Europe/Berlin.
+var AppLocation *time.Location
+
 // Config holds all application configuration loaded from environment variables.
 type Config struct {
 	Port            int
@@ -79,6 +83,14 @@ func Load() (*Config, error) {
 	if cfg.SessionSecret == "" && cfg.Env == "production" {
 		return nil, fmt.Errorf("SESSION_SECRET environment variable is required in production")
 	}
+
+	// Initialize application timezone
+	tzName := getEnv("APP_TIMEZONE", "Europe/Berlin")
+	loc, err := time.LoadLocation(tzName)
+	if err != nil {
+		return nil, fmt.Errorf("invalid APP_TIMEZONE %q: %w", tzName, err)
+	}
+	AppLocation = loc
 
 	return cfg, nil
 }

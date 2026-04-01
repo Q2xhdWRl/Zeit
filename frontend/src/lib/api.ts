@@ -18,6 +18,16 @@ import type {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     credentials: "include",
@@ -26,7 +36,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `Request failed: ${res.status}`);
+    throw new ApiError(body.message || `Request failed: ${res.status}`, res.status);
   }
   return res.json() as Promise<T>;
 }
@@ -350,7 +360,7 @@ export function stampIn(data?: { project_id?: string; description?: string }): P
   });
 }
 
-export function stampOut(): Promise<{ entry: unknown; warnings?: unknown[] }> {
+export function stampOut(): Promise<{ entry: unknown; warnings?: unknown[]; arbzg_capped?: boolean }> {
   return apiFetch("/stamp/out", { method: "POST" });
 }
 

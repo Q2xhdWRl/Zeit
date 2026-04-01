@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ActiveStamp } from "@/lib/api";
-import { fetchActiveStamp, stampIn, stampOut, toggleBreak, discardStamp } from "@/lib/api";
+import { fetchActiveStamp, stampIn, stampOut, toggleBreak, discardStamp, ApiError } from "@/lib/api";
 
 function formatDuration(
   startedAt: string,
@@ -33,9 +33,13 @@ function formatTime(iso: string): string {
   });
 }
 
+// ArbZG §3: max 10 hours gross per day
+const ARBZG_MAX_MINUTES = 600;
+
 export default function ClockWidget() {
   const [stamp, setStamp] = useState<ActiveStamp | null | undefined>(undefined);
   const [elapsed, setElapsed] = useState("");
+  const [grossMinutes, setGrossMinutes] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -59,14 +63,16 @@ export default function ClockWidget() {
   useEffect(() => {
     if (stamp) {
       const tick = () => {
-        setElapsed(
-          formatDuration(stamp.started_at, stamp.break_minutes, stamp.break_start),
-        );
+        const now = new Date();
+        setElapsed(formatDuration(stamp.started_at, stamp.break_minutes, stamp.break_start, now));
+        const gross = Math.floor((now.getTime() - new Date(stamp.started_at).getTime()) / 60_000);
+        setGrossMinutes(gross);
       };
       tick();
       tickRef.current = setInterval(tick, 1000);
     } else {
       setElapsed("");
+      setGrossMinutes(0);
     }
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
@@ -90,17 +96,36 @@ export default function ClockWidget() {
     setLoading(true);
     setError(null);
     try {
-      await stampOut();
+      const result = await stampOut();
       setStamp(null);
+      if (result.arbzg_capped) {
+        setError("Stempelzeit wurde auf 10 Stunden begrenzt (ArbZG §3).");
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fehler beim Gehen");
+      if (e instanceof ApiError && e.status === 409) {
+        if (e.message.includes("daily work limit")) {
+          // Backend already discarded the stamp — just clear local state.
+          setStamp(null);
+          setError("Tageslimit (ArbZG §3 · 10h) bereits erreicht. Stempel wurde verworfen.");
+        } else {
+          // Overlap: stamp can't be saved, auto-discard
+          try {
+            await discardStamp();
+            setStamp(null);
+            setError("Stempel konnte nicht gespeichert werden (Überschneidung) und wurde verworfen.");
+          } catch {
+            setError(e instanceof Error ? e.message : "Fehler beim Gehen");
+          }
+        }
+      } else {
+        setError(e instanceof Error ? e.message : "Fehler beim Gehen");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDiscard() {
-    if (!window.confirm("Stempel verwerfen? Es wird kein Zeiteintrag erstellt.")) return;
     setLoading(true);
     setError(null);
     try {
@@ -135,9 +160,10 @@ export default function ClockWidget() {
   }
 
   const onBreak = !!stamp?.break_start;
+  const atArbZGLimit = grossMinutes >= ARBZG_MAX_MINUTES;
 
   return (
-    <div className="rounded-xl border border-white/10 clock-glass p-4 space-y-3">
+    <div className={`rounded-xl border clock-glass p-4 space-y-3 ${atArbZGLimit ? "border-amber-500/50" : "border-white/10"}`}>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
           Stempeluhr
@@ -158,7 +184,7 @@ export default function ClockWidget() {
       {stamp ? (
         <>
           <div className="text-center">
-            <div className="text-3xl font-mono font-bold text-white tabular-nums">
+            <div className={`text-3xl font-mono font-bold tabular-nums ${atArbZGLimit ? "text-amber-400" : "text-white"}`}>
               {elapsed}
             </div>
             <div className="text-xs text-gray-400 mt-1">
@@ -166,6 +192,12 @@ export default function ClockWidget() {
               {stamp.break_minutes > 0 && ` · ${stamp.break_minutes} min Pause`}
             </div>
           </div>
+
+          {atArbZGLimit && (
+            <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs text-amber-300">
+              ArbZG §3: 10-Stunden-Limit erreicht. Beim Gehen wird die Zeit auf 10 Stunden begrenzt.
+            </div>
+          )}
 
           <div className="flex gap-2">
             <button
@@ -198,7 +230,11 @@ export default function ClockWidget() {
         </button>
       )}
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <p className={`text-xs ${error.includes("ArbZG") ? "text-amber-400" : "text-red-400"}`}>
+          {error}
+        </p>
+      )}
 
       {stamp && (
         <button

@@ -48,6 +48,7 @@ export default function OvertimePage() {
   const [summary, setSummary] = useState<OvertimeSummary | null>(null);
   const [trend, setTrend] = useState<OvertimeSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Team / admin breakdown
   const [teamSummaries, setTeamSummaries] = useState<UserOvertimeSummary[]>([]);
@@ -66,6 +67,8 @@ export default function OvertimePage() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Laden");
+    } finally {
+      setLoading(false);
     }
   }, [monthStart.getTime(), monthEnd.getTime()]);
 
@@ -76,7 +79,7 @@ export default function OvertimePage() {
   useEffect(() => {
     fetchOvertimeTrend()
       .then((data) => setTrend(data ?? []))
-      .catch(() => {});
+      .catch((e) => console.error("fetchOvertimeTrend failed:", e));
   }, []);
 
   // Load team / admin overtime breakdown when month changes
@@ -99,7 +102,7 @@ export default function OvertimePage() {
           }
         }
       })
-      .catch(() => {});
+      .catch((e) => console.error("fetchTeamOvertimeSummaries failed:", e));
   }, [monthStart.getTime(), monthEnd.getTime()]);
 
   function prevMonth() {
@@ -118,6 +121,25 @@ export default function OvertimePage() {
     ...trend.map((t) => Math.max(Math.abs(t.diff_minutes), t.target_minutes, t.actual_minutes)),
     1,
   );
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div className="h-8 w-48 rounded bg-muted/40" />
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-9 w-20 rounded bg-muted/30" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 rounded-xl bg-muted/20" />
+          ))}
+        </div>
+        <div className="h-48 rounded-xl bg-muted/20" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

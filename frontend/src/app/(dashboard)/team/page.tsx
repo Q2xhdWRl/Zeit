@@ -58,6 +58,7 @@ export default function TeamPage() {
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const weekEnd = addDays(weekStart, 4); // Mo-Fr
 
@@ -70,7 +71,7 @@ export default function TeamPage() {
         }
       })
       .catch(() => setError("Teams konnten nicht geladen werden"));
-  }, [selectedTeam]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = useCallback(async () => {
     if (!selectedTeam) return;
@@ -84,6 +85,8 @@ export default function TeamPage() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Laden");
+    } finally {
+      setLoading(false);
     }
   }, [selectedTeam, weekStart, weekEnd]);
 
@@ -121,6 +124,20 @@ export default function TeamPage() {
     lookup.set(`${a.user_id}_${a.date}`, a);
   }
 
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div className="h-8 w-48 rounded bg-muted/40" />
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-9 w-20 rounded bg-muted/30" />
+          ))}
+        </div>
+        <div className="h-64 rounded-xl bg-muted/20" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -135,6 +152,7 @@ export default function TeamPage() {
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
             className="rounded border border-border bg-background px-3 py-2 text-sm"
+            aria-label="Team auswaehlen"
           >
             {teams.map((t) => (
               <option key={t.team_id} value={t.team_id}>

@@ -950,7 +950,7 @@ export default function AbsencesPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Laden");
     }
-  }, [selectedTeamId, ganttViewStart.toISOString(), canReview]);
+  }, [selectedTeamId, ganttViewStart.getTime(), canReview]);
 
   useEffect(() => {
     loadTeamData();

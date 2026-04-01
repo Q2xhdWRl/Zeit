@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/model"
 	"github.com/newa/zeiterfassung/internal/repository"
 )
@@ -38,11 +39,11 @@ func (s *AbsenceService) Create(ctx context.Context, input CreateAbsenceInput) (
 		return nil, fmt.Errorf("invalid absence_type_id")
 	}
 
-	startDate, err := time.Parse("2006-01-02", input.StartDate)
+	startDate, err := time.ParseInLocation("2006-01-02", input.StartDate, config.AppLocation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid start_date format (expected YYYY-MM-DD)")
 	}
-	endDate, err := time.Parse("2006-01-02", input.EndDate)
+	endDate, err := time.ParseInLocation("2006-01-02", input.EndDate, config.AppLocation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid end_date format (expected YYYY-MM-DD)")
 	}
@@ -131,11 +132,11 @@ func (s *AbsenceService) Update(ctx context.Context, input UpdateAbsenceInput) (
 		return nil, fmt.Errorf("invalid absence_type_id")
 	}
 
-	startDate, err := time.Parse("2006-01-02", input.StartDate)
+	startDate, err := time.ParseInLocation("2006-01-02", input.StartDate, config.AppLocation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid start_date format")
 	}
-	endDate, err := time.Parse("2006-01-02", input.EndDate)
+	endDate, err := time.ParseInLocation("2006-01-02", input.EndDate, config.AppLocation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid end_date format")
 	}

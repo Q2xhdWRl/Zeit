@@ -16,17 +16,23 @@ func Auth(authService *service.AuthService) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("zeit_session")
 			if err != nil || cookie.Value == "" {
-				http.Error(w, `{"error":"Unauthorized","message":"not authenticated"}`, http.StatusUnauthorized)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error":"Unauthorized","message":"not authenticated"}`)) //nolint:errcheck
 				return
 			}
 
 			user, err := authService.ValidateSession(r.Context(), cookie.Value)
 			if err != nil {
-				http.Error(w, `{"error":"Internal Server Error","message":"session validation failed"}`, http.StatusInternalServerError)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"error":"Internal Server Error","message":"session validation failed"}`)) //nolint:errcheck
 				return
 			}
 			if user == nil {
-				http.Error(w, `{"error":"Unauthorized","message":"invalid or expired session"}`, http.StatusUnauthorized)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error":"Unauthorized","message":"invalid or expired session"}`)) //nolint:errcheck
 				return
 			}
 

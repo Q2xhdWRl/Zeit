@@ -75,38 +75,35 @@ DELETE FROM time_entries WHERE user_id IN (
   'a0000000-0000-0000-0000-000000000003'
 );
 
--- ── Zeiteintraege (aktuelle + letzte Woche fuer alle 3 User) ──
+-- ── Zeiteintraege ──
+-- Historisch (Jahresanfang bis 2 Wochen vor heute): je 8h/Tag fuer Admin+Leiter, 6h fuer User.
+-- Letzte Woche + aktuelle Woche: detaillierte Eintraege fuer manuelles Testen.
 
--- Montag dieser und letzter Woche berechnen
 DO $$
 DECLARE
   mon      DATE := date_trunc('week', CURRENT_DATE)::DATE;
   last_mon DATE := date_trunc('week', CURRENT_DATE)::DATE - 7;
+  hist_end DATE := date_trunc('week', CURRENT_DATE)::DATE - 14; -- Freitag 2 Wochen vor heute
+  d        DATE;
 BEGIN
 
-  -- ── Aktuelle Woche ──
+  -- ── Historische Eintraege (2026-01-05 bis hist_end) ──
+  -- Fuellt die Luecke seit Jahresanfang, damit Ueberstunden-Saldo realistisch bleibt.
+  d := '2026-01-05'::DATE;
+  WHILE d <= hist_end LOOP
+    IF EXTRACT(DOW FROM d) BETWEEN 1 AND 5 THEN
+      -- Admin + Leiter: 08:30-17:00, 30min Pause = 8h netto (entspricht 40h-Modell)
+      INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, description)
+      VALUES
+        ('a0000000-0000-0000-0000-000000000001', d, '08:30', '17:00', 30, 'Regulaere Arbeitszeit'),
+        ('a0000000-0000-0000-0000-000000000002', d, '08:30', '17:00', 30, 'Regulaere Arbeitszeit'),
+        -- User: 08:00-14:00, 0min Pause = 6h netto (entspricht 30h-Modell)
+        ('a0000000-0000-0000-0000-000000000003', d, '08:00', '14:00', 0,  'Regulaere Arbeitszeit');
+    END IF;
+    d := d + 1;
+  END LOOP;
 
-  -- Admin: Mo-Mi (Do+Fr frei fuer manuelles Testen)
-  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
-  VALUES
-    ('a0000000-0000-0000-0000-000000000001', mon,     '08:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Backend-Entwicklung'),
-    ('a0000000-0000-0000-0000-000000000001', mon + 1, '08:30', '17:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Code Review'),
-    ('a0000000-0000-0000-0000-000000000001', mon + 2, '07:30', '16:00', 45, 'c0000000-0000-0000-0000-000000000002', 'Kundenmeeting + Entwicklung');
-
-  -- Teamleiter: Mo-Mi
-  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
-  VALUES
-    ('a0000000-0000-0000-0000-000000000002', mon,     '09:00', '17:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Sprint Planning'),
-    ('a0000000-0000-0000-0000-000000000002', mon + 1, '08:00', '16:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Entwicklung'),
-    ('a0000000-0000-0000-0000-000000000002', mon + 2, '08:30', '17:00', 45, NULL, 'Team-Workshop');
-
-  -- User: Mo-Di
-  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
-  VALUES
-    ('a0000000-0000-0000-0000-000000000003', mon,     '08:00', '16:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Frontend-Arbeit'),
-    ('a0000000-0000-0000-0000-000000000003', mon + 1, '09:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Bugfixes');
-
-  -- ── Letzte Woche (fuer "Letzte Woche"-Ansicht) ──
+  -- ── Letzte Woche (detailliert, fuer "Letzte Woche"-Ansicht) ──
 
   -- Admin: Mo-Fr letzte Woche
   INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
@@ -117,9 +114,53 @@ BEGIN
     ('a0000000-0000-0000-0000-000000000001', last_mon + 3, '09:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Feature-Entwicklung'),
     ('a0000000-0000-0000-0000-000000000001', last_mon + 4, '08:00', '13:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Freitag kurzer Tag');
 
+  -- Leiter: Mo-Fr letzte Woche
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000002', last_mon,     '09:00', '17:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Sprint Planning'),
+    ('a0000000-0000-0000-0000-000000000002', last_mon + 1, '08:00', '16:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Entwicklung'),
+    ('a0000000-0000-0000-0000-000000000002', last_mon + 2, '08:30', '17:00', 45, NULL, 'Team-Workshop'),
+    ('a0000000-0000-0000-0000-000000000002', last_mon + 3, '08:30', '17:00', 30, 'c0000000-0000-0000-0000-000000000002', 'Reviews'),
+    ('a0000000-0000-0000-0000-000000000002', last_mon + 4, '08:30', '17:00', 30, 'c0000000-0000-0000-0000-000000000002', 'Dokumentation');
+
+  -- User: Mo-Fr letzte Woche
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000003', last_mon,     '08:00', '14:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Frontend'),
+    ('a0000000-0000-0000-0000-000000000003', last_mon + 1, '09:00', '15:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Bugfixes'),
+    ('a0000000-0000-0000-0000-000000000003', last_mon + 2, '08:00', '14:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Testing'),
+    ('a0000000-0000-0000-0000-000000000003', last_mon + 3, '08:00', '14:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Deployment'),
+    ('a0000000-0000-0000-0000-000000000003', last_mon + 4, '08:00', '14:00', 0,  'c0000000-0000-0000-0000-000000000001', 'Dokumentation');
+
+  -- ── Aktuelle Woche ──
+
+  -- Admin: Mo-Mi (Do+Fr frei fuer manuelles Testen)
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000001', mon,     '08:00', '17:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Backend-Entwicklung'),
+    ('a0000000-0000-0000-0000-000000000001', mon + 1, '08:30', '17:30', 30, 'c0000000-0000-0000-0000-000000000001', 'Code Review'),
+    ('a0000000-0000-0000-0000-000000000001', mon + 2, '07:30', '16:00', 45, 'c0000000-0000-0000-0000-000000000002', 'Kundenmeeting + Entwicklung');
+
+  -- Leiter: nur Mo (Di+folgende krank laut Abwesenheit)
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000002', mon, '09:00', '17:30', 30, 'c0000000-0000-0000-0000-000000000002', 'Sprint Planning');
+
+  -- User: Di (Mo = Homeoffice, kein separater Eintrag noetig)
+  INSERT INTO time_entries (user_id, entry_date, start_time, end_time, break_minutes, project_id, description)
+  VALUES
+    ('a0000000-0000-0000-0000-000000000003', mon + 1, '09:00', '15:00', 30, 'c0000000-0000-0000-0000-000000000001', 'Bugfixes');
+
 END $$;
 
 -- ── Abwesenheiten (Phase 5) ──
+
+-- Idempotent: bestehende Abwesenheiten der Testuser loeschen
+DELETE FROM absences WHERE user_id IN (
+  'a0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000002',
+  'a0000000-0000-0000-0000-000000000003'
+);
 
 -- Vacation entitlements fuer 2026
 INSERT INTO vacation_entitlements (user_id, year, total_days, carry_over_days)
@@ -127,30 +168,33 @@ VALUES
   ('a0000000-0000-0000-0000-000000000001', 2026, 30, 3),
   ('a0000000-0000-0000-0000-000000000002', 2026, 28, 2),
   ('a0000000-0000-0000-0000-000000000003', 2026, 30, 0)
-ON CONFLICT (user_id, year) DO NOTHING;
+ON CONFLICT (user_id, year) DO UPDATE SET total_days = EXCLUDED.total_days, carry_over_days = EXCLUDED.carry_over_days;
 
 -- Absences (use subquery for absence type IDs)
 INSERT INTO absences (user_id, absence_type_id, start_date, end_date, note, status, reviewed_by, reviewed_at)
 VALUES
-  -- Admin: 1 Woche Urlaub (genehmigt)
+  -- Admin: 1 Woche Urlaub zu Ostern (genehmigt, zukuenftig)
   ('a0000000-0000-0000-0000-000000000001',
    (SELECT id FROM absence_types WHERE name = 'Urlaub'),
    '2026-04-06', '2026-04-10', 'Osterurlaub', 'approved',
    'a0000000-0000-0000-0000-000000000001', NOW()),
-  -- Teamleiter: 2 Tage Krankheit (auto-genehmigt)
+  -- Teamleiter: 2 Tage Krankheit letzte/diese Woche (auto-genehmigt)
   ('a0000000-0000-0000-0000-000000000002',
    (SELECT id FROM absence_types WHERE name = 'Krankheit'),
-   '2026-03-30', '2026-03-31', 'Erkaeltung', 'approved',
+   date_trunc('week', CURRENT_DATE)::DATE,
+   date_trunc('week', CURRENT_DATE)::DATE + 1, 'Erkaeltung', 'approved',
    NULL, NULL),
-  -- User: Urlaub beantragt (pending)
+  -- User: Urlaub naechsten Monat (pending)
   ('a0000000-0000-0000-0000-000000000003',
    (SELECT id FROM absence_types WHERE name = 'Urlaub'),
-   '2026-04-20', '2026-04-24', 'Kurzurlaub', 'pending',
+   date_trunc('week', CURRENT_DATE)::DATE + 21,
+   date_trunc('week', CURRENT_DATE)::DATE + 25, 'Kurzurlaub', 'pending',
    NULL, NULL),
-  -- User: Homeoffice naechste Woche (auto-genehmigt)
+  -- User: Homeoffice Montag dieser Woche (auto-genehmigt)
   ('a0000000-0000-0000-0000-000000000003',
    (SELECT id FROM absence_types WHERE name = 'Homeoffice'),
-   '2026-03-30', '2026-03-30', '', 'approved',
+   date_trunc('week', CURRENT_DATE)::DATE,
+   date_trunc('week', CURRENT_DATE)::DATE, '', 'approved',
    NULL, NULL);
 
 -- ── Arbeitszeitmodelle (Phase 6) ──

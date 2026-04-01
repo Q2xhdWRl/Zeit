@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/middleware"
 	"github.com/newa/zeiterfassung/internal/repository"
 	"github.com/newa/zeiterfassung/internal/service"
@@ -70,6 +72,21 @@ func (h *StampHandler) StampIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Reject stamp-in if the current time falls within an existing time entry for today.
+	now := time.Now().In(config.AppLocation)
+	nowHM := now.Format("15:04")
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, config.AppLocation)
+	overlap, err := h.entrySvc.HasEntryAt(r.Context(), user.ID, today, nowHM)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to check entry overlap for stamp-in")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to check existing entries")
+		return
+	}
+	if overlap {
+		ErrorJSON(w, http.StatusConflict, "time entry already exists for this time slot")
+		return
+	}
+
 	var projectID *uuid.UUID
 	if req.ProjectID != nil && *req.ProjectID != "" {
 		pid, err := uuid.Parse(*req.ProjectID)
@@ -121,20 +138,59 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		stamp.BreakStart = nil
 	}
 
-	// Use consistent timezone for both start and end.
-	loc := now.Location()
+	// Use configured app timezone consistently for all date/time formatting.
+	loc := config.AppLocation
 	startLocal := stamp.StartedAt.In(loc)
 
 	startHM := startLocal.Format("15:04")
-	endHM := now.Format("15:04")
 	startDate := startLocal.Format("2006-01-02")
-	endDate := now.Format("2006-01-02")
+
+	// ArbZG §3: cap so that existing day net minutes + new net minutes ≤ 600.
+	// This allows multiple stamp cycles per day while respecting the legal daily limit.
+	const arbZGMaxMinutes = 600 // 10 hours
+	startDateParsed, _ := time.ParseInLocation("2006-01-02", startDate, loc)
+	existingNetMinutes, err := h.entrySvc.GetDayNetMinutes(r.Context(), user.ID, startDateParsed)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to fetch day net minutes for ArbZG check")
+		ErrorJSON(w, http.StatusInternalServerError, "failed to check daily work limit")
+		return
+	}
+
+	grossMinutes := int(now.Sub(stamp.StartedAt).Minutes())
+	arbZGCapped := false
+	remainingBudget := arbZGMaxMinutes - existingNetMinutes
+	maxGrossForThisStamp := remainingBudget + stamp.BreakMinutes
+	if maxGrossForThisStamp < 1 {
+		// Daily limit already exhausted by previous entries — discard the stuck stamp.
+		_ = h.stampRepo.Delete(r.Context(), user.ID)
+		log.Warn().
+			Str("user_id", user.ID.String()).
+			Int("existing_net_minutes", existingNetMinutes).
+			Msg("stamp discarded: ArbZG §3 daily limit already reached")
+		ErrorJSON(w, http.StatusConflict, "daily work limit (ArbZG §3) already reached")
+		return
+	}
+	if grossMinutes > maxGrossForThisStamp {
+		now = stamp.StartedAt.Add(time.Duration(maxGrossForThisStamp) * time.Minute)
+		arbZGCapped = true
+		log.Warn().
+			Str("user_id", user.ID.String()).
+			Int("gross_minutes", grossMinutes).
+			Int("existing_net_minutes", existingNetMinutes).
+			Int("remaining_budget", remainingBudget).
+			Msg("stamp-out capped at ArbZG §3 daily limit")
+	}
+
+	nowLocal := now.In(loc)
+	endHM := nowLocal.Format("15:04")
+	endDate := nowLocal.Format("2006-01-02")
 
 	// Ensure at least 1 minute of work.
 	if startHM == endHM && startDate == endDate {
 		ErrorJSON(w, http.StatusBadRequest, "stamp duration too short")
 		return
 	}
+
 
 	var lastEntry any
 	var lastViolations any
@@ -163,7 +219,7 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create day-1 entry from midnight-crossing stamp")
-			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			stampOutEntryError(w, err)
 			return
 		}
 
@@ -179,7 +235,7 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create day-2 entry from midnight-crossing stamp")
-			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			stampOutEntryError(w, err)
 			return
 		}
 		lastEntry = entry2
@@ -197,7 +253,7 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			log.Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to create time entry from stamp")
-			ErrorJSON(w, http.StatusBadRequest, fmt.Sprintf("stamp-out failed: %s", err.Error()))
+			stampOutEntryError(w, err)
 			return
 		}
 		lastEntry = entry
@@ -210,7 +266,11 @@ func (h *StampHandler) StampOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info().Str("user_id", user.ID.String()).Msg("stamped out")
-	JSON(w, http.StatusOK, map[string]any{"entry": lastEntry, "warnings": lastViolations})
+	JSON(w, http.StatusOK, map[string]any{
+		"entry":          lastEntry,
+		"warnings":       lastViolations,
+		"arbzg_capped":   arbZGCapped,
+	})
 }
 
 // Discard handles DELETE /api/stamp/active — abandons the active stamp without creating a time entry.
@@ -276,4 +336,15 @@ func (h *StampHandler) ToggleBreak(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSON(w, http.StatusOK, stamp)
+}
+
+// stampOutEntryError writes an appropriate error response for entry-creation failures during stamp-out.
+// Overlap errors get a 409 so the frontend can distinguish them and offer to discard the stamp.
+func stampOutEntryError(w http.ResponseWriter, err error) {
+	msg := fmt.Sprintf("stamp-out failed: %s", err.Error())
+	if strings.Contains(err.Error(), "overlaps") {
+		ErrorJSON(w, http.StatusConflict, msg)
+		return
+	}
+	ErrorJSON(w, http.StatusBadRequest, msg)
 }

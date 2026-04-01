@@ -91,6 +91,11 @@ func (s *TimeEntryService) Create(ctx context.Context, input CreateInput) (*mode
 	}
 
 	violations := ValidateArbZG(totalGross, totalBreak)
+	for _, v := range violations {
+		if v.Rule == "max_daily_hours" {
+			return nil, violations, fmt.Errorf("daily limit exceeded: net working time for this day would exceed 10 hours (ArbZG §3)")
+		}
+	}
 
 	entry, err := s.entryRepo.Create(ctx, input.UserID, entryDate, input.StartTime, input.EndTime, input.BreakMinutes, input.ProjectID, input.Description)
 	if err != nil {
@@ -185,6 +190,11 @@ func (s *TimeEntryService) Update(ctx context.Context, input UpdateInput) (*mode
 	}
 
 	violations := ValidateArbZG(totalGross, totalBreak)
+	for _, v := range violations {
+		if v.Rule == "max_daily_hours" {
+			return nil, violations, fmt.Errorf("daily limit exceeded: net working time for this day would exceed 10 hours (ArbZG §3)")
+		}
+	}
 
 	updated, err := s.entryRepo.Update(ctx, input.EntryID, entryDate, input.StartTime, input.EndTime, input.BreakMinutes, input.ProjectID, input.Description)
 	if err != nil {
@@ -194,6 +204,50 @@ func (s *TimeEntryService) Update(ctx context.Context, input UpdateInput) (*mode
 	s.entryRepo.CreateAudit(ctx, input.EntryID, existing.UserID, "update", existing, updated, input.UserID)
 
 	return updated, violations, nil
+}
+
+// GetDayNetMinutes returns the total net worked minutes for a user on a given date
+// across all existing time entries. Used by StampOut to enforce the daily ArbZG cap.
+func (s *TimeEntryService) GetDayNetMinutes(ctx context.Context, userID uuid.UUID, date time.Time) (int, error) {
+	entries, err := s.entryRepo.ListByUserAndDate(ctx, userID, date)
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch day entries: %w", err)
+	}
+	total := 0
+	for _, e := range entries {
+		gross, _ := ValidateTimeRange(e.StartTime, e.EndTime)
+		total += gross - e.BreakMinutes
+	}
+	return total, nil
+}
+
+// HasEntryAt returns true if the user already has a time entry on the given date
+// whose time range includes the given clock time (HH:MM). Used to prevent stamp-in
+// inside an existing entry.
+func (s *TimeEntryService) HasEntryAt(ctx context.Context, userID uuid.UUID, date time.Time, clockHM string) (bool, error) {
+	entries, err := s.entryRepo.ListByUserAndDate(ctx, userID, date)
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch day entries: %w", err)
+	}
+	clock, err := parseTime(clockHM)
+	if err != nil {
+		return false, fmt.Errorf("invalid clockHM: %w", err)
+	}
+	for _, e := range entries {
+		start, err := parseTime(e.StartTime)
+		if err != nil {
+			continue
+		}
+		end, err := parseTime(e.EndTime)
+		if err != nil {
+			continue
+		}
+		// Clock is inside [start, end)
+		if !clock.Before(start) && clock.Before(end) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // Delete removes a time entry after authorization check.

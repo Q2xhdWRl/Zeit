@@ -359,22 +359,22 @@ export default function StartseiteePage() {
   const [availability, setAvailability] = useState<DayAvailability[]>([]);
 
   useEffect(() => {
-    fetchMe().then(setUser).catch(() => {});
-    fetchVacationBalance().then(setVacationBalance).catch(() => {});
+    fetchMe().then(setUser).catch((e) => console.error("fetchMe failed:", e));
+    fetchVacationBalance().then(setVacationBalance).catch((e) => console.error("fetchVacationBalance failed:", e));
 
     // Week summary
     const weekStart = getMonday(new Date());
     const weekEnd = addDays(weekStart, 6);
     fetchTimeEntrySummary(toDateString(weekStart), toDateString(weekEnd))
       .then((s) => setWeekSummary(s ?? []))
-      .catch(() => {});
+      .catch((e) => console.error("fetchTimeEntrySummary failed:", e));
 
     // Upcoming absences (next 90 days)
     const today = toDateString(new Date());
     const future = toDateString(addDays(new Date(), 90));
     fetchAbsences(today, future)
       .then((a) => setUpcomingAbsences((a ?? []).filter((x) => x.status !== "rejected" && x.status !== "cancelled")))
-      .catch(() => {});
+      .catch((e) => console.error("fetchAbsences failed:", e));
   }, []);
 
   // Load team data once we have the user
@@ -390,7 +390,7 @@ export default function StartseiteePage() {
         const avail = await fetchTeamAvailability(firstTeamId, today, today);
         setAvailability(avail ?? []);
       })
-      .catch(() => {});
+      .catch((e) => console.error("fetchTeamAvailability failed:", e));
 
     // Pending absences (own or team)
     if (isTeamLeaderOrAdmin(user)) {
@@ -401,18 +401,41 @@ export default function StartseiteePage() {
           const pending = await fetchPendingAbsences(firstTeamId);
           setPendingAbsences(pending ?? []);
         })
-        .catch(() => {});
+        .catch((e) => console.error("fetchPendingAbsences failed:", e));
     } else {
       // Own pending absences
       const today = toDateString(new Date());
       const future = toDateString(addDays(new Date(), 365));
       fetchAbsences(today, future)
         .then((a) => setPendingAbsences((a ?? []).filter((x) => x.status === "pending")))
-        .catch(() => {});
+        .catch((e) => console.error("fetchAbsences failed:", e));
     }
   }, [user]);
 
   const isLeader = isTeamLeaderOrAdmin(user);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div>
+          <div className="h-4 w-40 rounded bg-muted/40" />
+          <div className="h-9 w-64 rounded bg-muted/40 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-xl bg-muted/20" />
+            ))}
+          </div>
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-40 rounded-xl bg-muted/20" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -420,7 +443,7 @@ export default function StartseiteePage() {
       <div>
         <p className="text-sm text-muted-foreground">{todayLabel()}</p>
         <h1 className="font-heading text-3xl font-bold tracking-tight mt-0.5">
-          {greeting()}, {user?.display_name.split(" ")[0] ?? "…"}
+          {greeting()}, {user.display_name.split(" ")[0]}
         </h1>
       </div>
 

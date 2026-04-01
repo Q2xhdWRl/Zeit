@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/middleware"
 	"github.com/newa/zeiterfassung/internal/repository"
 	"github.com/newa/zeiterfassung/internal/service"
@@ -52,7 +53,7 @@ func (h *OvertimeHandler) OvertimeTrend(w http.ResponseWriter, r *http.Request) 
 	now := time.Now()
 	monthsBack := 6
 
-	toMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+	toMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, config.AppLocation)
 	fromMonth := toMonth.AddDate(0, -(monthsBack - 1), 0)
 
 	summaries, err := h.svc.MonthlyOvertimeTrend(r.Context(), user.ID, fromMonth, toMonth)
@@ -155,6 +156,23 @@ func (h *OvertimeHandler) UpsertSchedule(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	dailyHours := []float64{
+		req.MondayHours, req.TuesdayHours, req.WednesdayHours,
+		req.ThursdayHours, req.FridayHours, req.SaturdayHours, req.SundayHours,
+	}
+	sumDaily := 0.0
+	for _, h := range dailyHours {
+		if h < 0 || h > 24 {
+			ErrorJSON(w, http.StatusBadRequest, "daily hours must be between 0 and 24")
+			return
+		}
+		sumDaily += h
+	}
+	if diff := sumDaily - req.WeeklyHours; diff > 0.01 || diff < -0.01 {
+		ErrorJSON(w, http.StatusBadRequest, "sum of daily hours must equal weekly_hours")
+		return
+	}
+
 	schedule, err := h.scheduleRepo.Upsert(r.Context(), userID, validFrom,
 		req.WeeklyHours, req.MondayHours, req.TuesdayHours, req.WednesdayHours,
 		req.ThursdayHours, req.FridayHours, req.SaturdayHours, req.SundayHours)
@@ -221,11 +239,12 @@ func parseOvertimeDateRange(r *http.Request) (time.Time, time.Time, error) {
 		return from, to, nil
 	}
 
-	from, err := time.Parse("2006-01-02", fromStr)
+	loc := config.AppLocation
+	from, err := time.ParseInLocation("2006-01-02", fromStr, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
-	to, err := time.Parse("2006-01-02", toStr)
+	to, err := time.ParseInLocation("2006-01-02", toStr, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}

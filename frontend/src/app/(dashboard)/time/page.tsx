@@ -103,6 +103,7 @@ export default function TimePage() {
   // Stat cards
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [vacationDays, setVacationDays] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Last-week summary
   const [lastWeekSummary, setLastWeekSummary] = useState<DailySummary[]>([]);
@@ -120,6 +121,8 @@ export default function TimePage() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Laden");
+    } finally {
+      setLoading(false);
     }
   }, [weekStart, weekEnd]);
 
@@ -180,6 +183,11 @@ export default function TimePage() {
     setError(null);
     setWarnings([]);
 
+    if (form.start_time >= form.end_time) {
+      setError("Endzeit muss nach der Startzeit liegen.");
+      return;
+    }
+
     try {
       const data = {
         entry_date: form.entry_date,
@@ -208,6 +216,7 @@ export default function TimePage() {
   }
 
   async function handleDelete(entryId: string) {
+    if (!window.confirm("Zeiteintrag wirklich loeschen?")) return;
     try {
       await deleteTimeEntry(entryId);
       await loadData();
@@ -232,6 +241,28 @@ export default function TimePage() {
 
   // Weekly totals
   const weekTotalMinutes = entries.reduce((sum, e) => sum + getWorkMinutes(e), 0);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="h-8 w-40 rounded bg-muted/40" />
+            <div className="h-20 w-72 rounded-xl bg-muted/20 mt-4" />
+          </div>
+          <div className="h-10 w-32 rounded bg-muted/30" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 rounded-xl bg-muted/20" />
+          ))}
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-28 rounded-xl bg-muted/20" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

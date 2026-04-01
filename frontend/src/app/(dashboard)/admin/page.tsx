@@ -61,6 +61,7 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [absenceTypes, setAbsenceTypes] = useState<AbsenceType[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newTeamName, setNewTeamName] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectCustomer, setNewProjectCustomer] = useState("");
@@ -98,6 +99,8 @@ export default function AdminPage() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Laden");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -145,6 +148,7 @@ export default function AdminPage() {
   }
 
   async function handleDeleteTeam(teamId: string) {
+    if (!window.confirm("Team wirklich loeschen?")) return;
     try {
       await deleteTeam(teamId);
       if (selectedTeam === teamId) {
@@ -170,6 +174,7 @@ export default function AdminPage() {
 
   async function handleRemoveMember(userId: string) {
     if (!selectedTeam) return;
+    if (!window.confirm("Mitglied wirklich entfernen?")) return;
     try {
       await removeTeamMember(selectedTeam, userId);
       await loadTeamMembers(selectedTeam);
@@ -254,6 +259,20 @@ export default function AdminPage() {
   }
 
   const dayLabels = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div className="h-8 w-36 rounded bg-muted/40" />
+        <div className="flex gap-1 rounded-lg bg-muted/10 p-1">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-10 w-24 rounded-md bg-muted/20" />
+          ))}
+        </div>
+        <div className="h-64 rounded-xl bg-muted/20" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -394,7 +413,12 @@ export default function AdminPage() {
                     onClick={() => loadTeamMembers(team.id)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => e.key === "Enter" && loadTeamMembers(team.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        loadTeamMembers(team.id);
+                      }
+                    }}
                     aria-label={`Team ${team.name} auswaehlen`}
                   >
                     <div>

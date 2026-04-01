@@ -53,20 +53,29 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       fetchMe(),
       fetchWorkSchedule(),
       fetchVacationBalance(),
-    ])
-      .then(([u, schedules, b]) => {
-        setUser(u);
-        // Most recent schedule (API returns ordered by valid_from DESC)
+    ]).then(([userResult, schedResult, balResult]) => {
+      if (userResult.status === "fulfilled") {
+        setUser(userResult.value);
+      } else {
+        setError("Profildaten konnten nicht geladen werden");
+        console.error("fetchMe failed:", userResult.reason);
+      }
+      if (schedResult.status === "fulfilled") {
+        const schedules = schedResult.value;
         setSchedule(schedules.length > 0 ? schedules[0] : null);
-        setBalance(b);
-      })
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : "Fehler beim Laden"),
-      );
+      } else {
+        console.error("fetchWorkSchedule failed:", schedResult.reason);
+      }
+      if (balResult.status === "fulfilled") {
+        setBalance(balResult.value);
+      } else {
+        console.error("fetchVacationBalance failed:", balResult.reason);
+      }
+    });
   }, []);
 
   if (error) {

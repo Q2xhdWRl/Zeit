@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/model"
 )
 
@@ -96,6 +97,10 @@ func (r *AbsenceRepository) UpdateAbsenceType(ctx context.Context, id uuid.UUID,
 
 const absenceColumns = `id, user_id, absence_type_id, start_date, end_date, note, status, reviewed_by, reviewed_at, review_note, created_at, updated_at`
 
+// absenceColumnsA qualifies every column with the "a" table alias, required for
+// JOIN queries where other tables (e.g. team_members) expose the same column names.
+const absenceColumnsA = `a.id, a.user_id, a.absence_type_id, a.start_date, a.end_date, a.note, a.status, a.reviewed_by, a.reviewed_at, a.review_note, a.created_at, a.updated_at`
+
 func scanAbsence(row pgx.Row) (*model.Absence, error) {
 	var a model.Absence
 	err := row.Scan(&a.ID, &a.UserID, &a.AbsenceTypeID, &a.StartDate, &a.EndDate, &a.Note, &a.Status, &a.ReviewedBy, &a.ReviewedAt, &a.ReviewNote, &a.CreatedAt, &a.UpdatedAt)
@@ -135,7 +140,7 @@ func (r *AbsenceRepository) ListByUser(ctx context.Context, userID uuid.UUID, fr
 // ListByTeam returns absences for all members of a team in a date range.
 func (r *AbsenceRepository) ListByTeam(ctx context.Context, teamID uuid.UUID, from, to time.Time) ([]model.Absence, error) {
 	return r.queryAbsences(ctx,
-		`SELECT a.`+absenceColumns+`
+		`SELECT `+absenceColumnsA+`
 		 FROM absences a
 		 JOIN team_members tm ON tm.user_id = a.user_id
 		 WHERE tm.team_id = $1 AND a.start_date <= $3 AND a.end_date >= $2
@@ -146,7 +151,7 @@ func (r *AbsenceRepository) ListByTeam(ctx context.Context, teamID uuid.UUID, fr
 // ListPendingForTeam returns pending absences for a team (for approval).
 func (r *AbsenceRepository) ListPendingForTeam(ctx context.Context, teamID uuid.UUID) ([]model.Absence, error) {
 	return r.queryAbsences(ctx,
-		`SELECT a.`+absenceColumns+`
+		`SELECT `+absenceColumnsA+`
 		 FROM absences a
 		 JOIN team_members tm ON tm.user_id = a.user_id
 		 WHERE tm.team_id = $1 AND a.status = 'pending'
@@ -205,8 +210,8 @@ func (r *AbsenceRepository) HasOverlap(ctx context.Context, userID uuid.UUID, st
 // CountVacationDays counts approved + pending vacation days for a user in a given year.
 // Returns (approved_days, pending_days).
 func (r *AbsenceRepository) CountVacationDays(ctx context.Context, userID uuid.UUID, year int, vacationTypeID uuid.UUID) (int, int, error) {
-	yearStart := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-	yearEnd := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
+	yearStart := time.Date(year, 1, 1, 0, 0, 0, 0, config.AppLocation)
+	yearEnd := time.Date(year, 12, 31, 0, 0, 0, 0, config.AppLocation)
 
 	rows, err := r.db.Query(ctx,
 		`SELECT start_date, end_date, status FROM absences

@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/newa/zeiterfassung/internal/config"
 	"github.com/newa/zeiterfassung/internal/model"
 	"github.com/newa/zeiterfassung/internal/repository"
 )
@@ -142,12 +143,13 @@ func (s *OvertimeService) GetOvertimeSummary(ctx context.Context, userID uuid.UU
 func (s *OvertimeService) MonthlyOvertimeTrend(ctx context.Context, userID uuid.UUID, fromMonth, toMonth time.Time) ([]model.OvertimeSummary, error) {
 	var summaries []model.OvertimeSummary
 
-	current := time.Date(fromMonth.Year(), fromMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
-	end := time.Date(toMonth.Year(), toMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
+	loc := config.AppLocation
+	current := time.Date(fromMonth.Year(), fromMonth.Month(), 1, 0, 0, 0, 0, loc)
+	end := time.Date(toMonth.Year(), toMonth.Month(), 1, 0, 0, 0, 0, loc)
 
 	for !current.After(end) {
 		monthStart := current
-		monthEnd := time.Date(current.Year(), current.Month()+1, 0, 0, 0, 0, 0, time.UTC)
+		monthEnd := time.Date(current.Year(), current.Month()+1, 0, 0, 0, 0, 0, loc)
 
 		summary, err := s.GetOvertimeSummary(ctx, userID, monthStart, monthEnd)
 		if err != nil {
@@ -305,6 +307,22 @@ func (s *OvertimeService) GetDashboardStats(ctx context.Context, userID uuid.UUI
 		TodayMinutes:  todayMinutes,
 		WeekMinutes:   weekMinutes,
 		MonthOvertime: monthOvertime,
+	}
+
+	// Team availability for today: use the user's first team.
+	memberships, err := s.teamRepo.ListTeamsForUser(ctx, userID)
+	if err == nil && len(memberships) > 0 {
+		availability, err := s.TeamAvailability(ctx, memberships[0].TeamID, today, today)
+		if err == nil {
+			for _, a := range availability {
+				if a.Date == today.Format("2006-01-02") {
+					stats.TeamTotalCount++
+					if a.Status == "present" || a.Status == "homeoffice" {
+						stats.TeamPresentCount++
+					}
+				}
+			}
+		}
 	}
 
 	return stats, nil
