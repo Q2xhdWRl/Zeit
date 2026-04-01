@@ -259,7 +259,7 @@ function InboxCard({
       </CardHeader>
       <CardContent className="pt-0 space-y-2">
         {pendingAbsences.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Keine offenen Eintraege</p>
+          <p className="text-xs text-muted-foreground">Keine offenen Einträge</p>
         ) : (
           pendingAbsences.slice(0, 5).map((a) => {
             const start = new Date(a.start_date);
@@ -287,7 +287,7 @@ function InboxCard({
         )}
         {pendingAbsences.length > 0 && (
           <Link href="/absences" className="block text-xs text-primary hover:underline">
-            {isLeader ? "Antraege pruefen →" : "Details anzeigen →"}
+            {isLeader ? "Anträge prüfen →" : "Details anzeigen →"}
           </Link>
         )}
       </CardContent>
@@ -341,7 +341,7 @@ function WeekCard({ summary }: { summary: DailySummary[] }) {
           </div>
         ))}
         <Link href="/time" className="block text-xs text-primary hover:underline pt-1">
-          Zeiterfassung offnen →
+          Zeiterfassung öffnen →
         </Link>
       </CardContent>
     </Card>

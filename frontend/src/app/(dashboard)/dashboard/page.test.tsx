@@ -48,7 +48,7 @@ describe("DashboardPage", () => {
     expect(screen.getAllByText(/Heute gebucht/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Resturlaub/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Team heute/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Ueberstunden/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Überstunden/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("displays today's hours after data loads", async () => {

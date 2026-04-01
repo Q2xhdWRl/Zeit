@@ -40,7 +40,7 @@ describe("TimePage", () => {
 
   it("renders day cards with empty messages", async () => {
     render(<TimePage />);
-    const emptyMessages = await screen.findAllByText("Keine Eintraege");
+    const emptyMessages = await screen.findAllByText("Keine Einträge");
     // At least 7 (one per day, may render more in strict mode)
     expect(emptyMessages.length).toBeGreaterThanOrEqual(7);
   });

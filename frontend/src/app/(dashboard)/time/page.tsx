@@ -348,7 +348,7 @@ export default function TimePage() {
 
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Ueberstunden</CardTitle>
+            <CardTitle className="text-sm font-medium">Überstunden</CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -362,7 +362,7 @@ export default function TimePage() {
                     {formatDiffMinutes(diff)} h
                   </div>
                   <Badge variant={positive ? "default" : "destructive"} className="mt-1">
-                    {positive ? "Ueberstunden" : "Minusstunden"}
+                    {positive ? "Überstunden" : "Minusstunden"}
                   </Badge>
                 </>
               );
@@ -391,7 +391,7 @@ export default function TimePage() {
                   <div key={day.date} className="flex items-center justify-between py-1 border-b border-border/30 last:border-0">
                     <span className="text-sm text-muted-foreground w-28">{label}</span>
                     <span className="text-sm font-medium text-primary">{formatDailyMinutes(day.total_minutes)}</span>
-                    <span className="text-xs text-muted-foreground">{day.entry_count} {day.entry_count === 1 ? "Eintrag" : "Eintraege"}</span>
+                    <span className="text-xs text-muted-foreground">{day.entry_count} {day.entry_count === 1 ? "Eintrag" : "Einträge"}</span>
                   </div>
                 );
               })}
@@ -640,7 +640,7 @@ export default function TimePage() {
               {dayEntries.length === 0 && (
                 <CardContent className="pt-0">
                   <p className="text-xs text-muted-foreground text-center py-2">
-                    Keine Eintraege
+                    Keine Einträge
                   </p>
                 </CardContent>
               )}

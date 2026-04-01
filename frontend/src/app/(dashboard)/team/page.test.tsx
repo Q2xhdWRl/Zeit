@@ -15,7 +15,7 @@ describe("TeamPage", () => {
   it("renders the page heading", () => {
     render(<TeamPage />);
     expect(
-      screen.getByRole("heading", { name: /Teamuebersicht/i }),
+      screen.getByRole("heading", { name: /Teamübersicht/i }),
     ).toBeInTheDocument();
   });
 

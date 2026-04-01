@@ -144,7 +144,7 @@ export default function TeamPage() {
         <div className="flex items-center gap-3">
           <Users className="size-6 text-primary" />
           <h1 className="font-heading text-2xl font-bold tracking-tight">
-            Teamuebersicht
+            Teamübersicht
           </h1>
         </div>
         {teams.length > 1 && (

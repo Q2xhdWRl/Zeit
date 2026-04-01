@@ -73,7 +73,7 @@ export default function LandingPage() {
           <FeatureCard
             icon={Clock}
             title="Zeiterfassung"
-            description="Arbeitszeiten einfach buchen. Tages- und Wochenansicht mit ArbZG-Pruefung."
+            description="Arbeitszeiten einfach buchen. Tages- und Wochenansicht mit ArbZG-Prüfung."
           />
           <FeatureCard
             icon={CalendarDays}
@@ -82,19 +82,19 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={Users}
-            title="Teamuebersicht"
-            description="Verfuegbarkeit im Team auf einen Blick. Wer ist da, wer fehlt."
+            title="Teamübersicht"
+            description="Verfügbarkeit im Team auf einen Blick. Wer ist da, wer fehlt."
           />
           <FeatureCard
             icon={TrendingUp}
-            title="Ueberstunden"
-            description="Soll-Ist-Vergleich und Ueberstundentrends pro Mitarbeiter."
+            title="Überstunden"
+            description="Soll-Ist-Vergleich und Überstundentrends pro Mitarbeiter."
           />
         </div>
 
         {/* Footer hint */}
         <p className="text-xs text-muted-foreground/60">
-          Sichere Anmeldung ueber Microsoft 365 &middot; DSGVO-konform &middot;
+          Sichere Anmeldung über Microsoft 365 &middot; DSGVO-konform &middot;
           Made for NEWA
         </p>
       </div>

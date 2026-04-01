@@ -21,7 +21,7 @@ describe("OvertimePage", () => {
   it("renders the page heading", () => {
     render(<OvertimePage />);
     expect(
-      screen.getByRole("heading", { name: /Ueberstunden/i }),
+      screen.getByRole("heading", { name: /Überstunden/i }),
     ).toBeInTheDocument();
   });
 

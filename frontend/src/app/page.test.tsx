@@ -16,8 +16,8 @@ describe("LandingPage", () => {
     const titles = headings.map((h) => h.textContent);
     expect(titles).toContain("Zeiterfassung");
     expect(titles).toContain("Abwesenheiten");
-    expect(titles).toContain("Teamuebersicht");
-    expect(titles).toContain("Ueberstunden");
+    expect(titles).toContain("Teamübersicht");
+    expect(titles).toContain("Überstunden");
   });
 
   it("renders the Microsoft login button", () => {

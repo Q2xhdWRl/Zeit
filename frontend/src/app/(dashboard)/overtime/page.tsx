@@ -146,7 +146,7 @@ export default function OvertimePage() {
       <div className="flex items-center gap-3">
         <TrendingUp className="size-6 text-primary" />
         <h1 className="font-heading text-2xl font-bold tracking-tight">
-          Ueberstunden
+          Überstunden
         </h1>
       </div>
 
@@ -219,7 +219,7 @@ export default function OvertimePage() {
                 variant={summary.diff_minutes >= 0 ? "default" : "destructive"}
                 className="mt-1"
               >
-                {summary.diff_minutes >= 0 ? "Ueberstunden" : "Minusstunden"}
+                {summary.diff_minutes >= 0 ? "Überstunden" : "Minusstunden"}
               </Badge>
             </CardContent>
           </Card>
@@ -270,7 +270,7 @@ export default function OvertimePage() {
       {showTeam && teamSummaries.length > 0 && (
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle className="text-base">Team-Ueberstunden</CardTitle>
+            <CardTitle className="text-base">Team-Überstunden</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

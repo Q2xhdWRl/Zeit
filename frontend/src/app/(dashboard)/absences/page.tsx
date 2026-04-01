@@ -443,8 +443,14 @@ function GanttTimeline({
       {/* Pending notice for team leaders */}
       {canReview && pendingCount > 0 && (
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-2 text-sm text-yellow-300">
-          <span className="font-medium">{pendingCount} ausstehende</span>
-          <span>Abwesenheitsanträge — klicke auf einen Balken zum Prüfen</span>
+          <span className="font-medium">
+            {pendingCount} {pendingCount === 1 ? "ausstehender" : "ausstehende"}
+          </span>
+          <span>
+            {pendingCount === 1
+              ? "Abwesenheitsantrag — klicke auf den Balken zum Prüfen"
+              : "Abwesenheitsanträge — klicke auf einen Balken zum Prüfen"}
+          </span>
         </div>
       )}
 

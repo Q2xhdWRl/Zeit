@@ -31,7 +31,7 @@ const mainNav: NavItem[] = [
   { href: "/time", label: "Zeiterfassung", icon: Clock },
   { href: "/absences", label: "Abwesenheiten", icon: CalendarDays },
   { href: "/team", label: "Team", icon: Users },
-  { href: "/overtime", label: "Ueberstunden", icon: TrendingUp },
+  { href: "/overtime", label: "Überstunden", icon: TrendingUp },
 ];
 
 const adminNav: NavItem[] = [
