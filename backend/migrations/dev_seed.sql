@@ -23,7 +23,7 @@ VALUES
   ('a0000000-0000-0000-0000-000000000001', 'admin@newa.test', 'Anna Admin', 'admin', true),
   ('a0000000-0000-0000-0000-000000000002', 'leader@newa.test', 'Lars Leiter', 'team_leader', true),
   ('a0000000-0000-0000-0000-000000000003', 'user@newa.test', 'Udo User', 'user', true)
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET global_role = EXCLUDED.global_role, display_name = EXCLUDED.display_name;
 
 -- ── Sessions (Token → SHA-256 Hash) ──
 -- dev-admin-token  → 1734d503f6aa6a047c36d113cbad769f719c93784b469b771c4c3e7c63adbefd

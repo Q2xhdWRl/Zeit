@@ -1,0 +1,143 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Ueberstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Ueberstunden
+        - generic [ref=e31]: Administration
+        - link "Verwaltung" [ref=e32] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e33]
+          - text: Verwaltung
+      - generic [ref=e35]:
+        - link "Anna Admin admin@newa.test" [ref=e36] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e37]
+          - generic [ref=e41]:
+            - paragraph [ref=e42]: Anna Admin
+            - paragraph [ref=e43]: admin@newa.test
+        - link "Abmelden" [ref=e44] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e45]
+          - text: Abmelden
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]: Admin
+          - generic [ref=e53]: admin@newa.test
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - img [ref=e58]
+            - heading "An- und Abwesenheit" [level=1] [ref=e60]
+          - button "Abwesenheit beantragen" [ref=e61]:
+            - img
+            - text: Abwesenheit beantragen
+        - generic [ref=e196]: failed to list team absences
+        - generic [ref=e62]:
+          - button "Teamkalender" [ref=e63]
+          - button "Abwesenheit" [active] [ref=e64]
+        - generic [ref=e197]:
+          - button [ref=e198]:
+            - img
+          - button "Heute" [ref=e199]
+          - button [ref=e200]:
+            - img
+          - generic [ref=e201]: März 2026
+        - generic [ref=e202]:
+          - generic [ref=e203]:
+            - generic [ref=e205]: Urlaubskonto 2026
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - paragraph [ref=e209]: Anspruch
+                - paragraph [ref=e210]: 30d
+              - generic [ref=e211]:
+                - paragraph [ref=e212]: Übertrag
+                - paragraph [ref=e213]: 3d
+              - generic [ref=e214]:
+                - paragraph [ref=e215]: Genommen
+                - paragraph [ref=e216]: 110d
+              - generic [ref=e217]:
+                - paragraph [ref=e218]: Beantragt
+                - paragraph [ref=e219]: 0d
+              - generic [ref=e220]:
+                - paragraph [ref=e221]: Verbleibend
+                - paragraph [ref=e222]: "-77d"
+          - generic [ref=e225]:
+            - generic [ref=e226]: Mo
+            - generic [ref=e227]: Di
+            - generic [ref=e228]: Mi
+            - generic [ref=e229]: Do
+            - generic [ref=e230]: Fr
+            - generic [ref=e231]: Sa
+            - generic [ref=e232]: So
+            - generic [ref=e233]: "23"
+            - generic [ref=e234]: "24"
+            - generic [ref=e235]: "25"
+            - generic [ref=e236]: "26"
+            - generic [ref=e237]: "27"
+            - generic [ref=e238]: "28"
+            - generic [ref=e239]: "1"
+            - generic [ref=e240]: "2"
+            - generic [ref=e241]: "3"
+            - generic [ref=e242]: "4"
+            - generic [ref=e243]: "5"
+            - generic [ref=e244]: "6"
+            - generic [ref=e245]: "7"
+            - generic [ref=e246]: "8"
+            - generic [ref=e247]: "9"
+            - generic [ref=e248]: "10"
+            - generic [ref=e249]: "11"
+            - generic [ref=e250]: "12"
+            - generic [ref=e251]: "13"
+            - generic [ref=e252]: "14"
+            - generic [ref=e253]: "15"
+            - generic [ref=e254]: "16"
+            - generic [ref=e255]: "17"
+            - generic [ref=e256]: "18"
+            - generic [ref=e257]: "19"
+            - generic [ref=e258]: "20"
+            - generic [ref=e259]: "21"
+            - generic [ref=e260]: "22"
+            - generic [ref=e261]: "23"
+            - generic [ref=e262]: "24"
+            - generic [ref=e263]: "25"
+            - generic [ref=e264]: "26"
+            - generic [ref=e265]: "27"
+            - generic [ref=e266]: "28"
+            - generic [ref=e267]: "29"
+            - generic [ref=e268]: "30"
+            - generic [ref=e269]: "31"
+            - generic [ref=e270]: "1"
+            - generic [ref=e271]: "2"
+            - generic [ref=e272]: "3"
+            - generic [ref=e273]: "4"
+            - generic [ref=e274]: "5"
+          - generic [ref=e275]:
+            - heading "Abwesenheiten März 2026" [level=3] [ref=e276]
+            - paragraph [ref=e277]: Keine Einträge in diesem Monat
+    - button "Stempeluhr" [ref=e190]:
+      - img [ref=e191]
+      - generic [ref=e194]: 00:23
+  - alert [ref=e195]

@@ -123,7 +123,7 @@ export default function AdminPage() {
       await updateUserRole(userId, newRole);
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Aendern der Rolle");
+      setError(err instanceof Error ? err.message : "Fehler beim Ändern der Rolle");
     }
   }
 
@@ -132,7 +132,7 @@ export default function AdminPage() {
       await updateUserActive(userId, !currentlyActive);
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Aendern des Status");
+      setError(err instanceof Error ? err.message : "Fehler beim Ändern des Status");
     }
   }
 
@@ -148,7 +148,7 @@ export default function AdminPage() {
   }
 
   async function handleDeleteTeam(teamId: string) {
-    if (!window.confirm("Team wirklich loeschen?")) return;
+    if (!window.confirm("Team wirklich löschen?")) return;
     try {
       await deleteTeam(teamId);
       if (selectedTeam === teamId) {
@@ -157,7 +157,7 @@ export default function AdminPage() {
       }
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Loeschen");
+      setError(err instanceof Error ? err.message : "Fehler beim Löschen");
     }
   }
 
@@ -200,7 +200,7 @@ export default function AdminPage() {
       await updateProject(p.id, p.name, p.customer_name, !p.is_active);
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Aendern");
+      setError(err instanceof Error ? err.message : "Fehler beim Ändern");
     }
   }
 
@@ -216,7 +216,7 @@ export default function AdminPage() {
       });
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Aendern");
+      setError(err instanceof Error ? err.message : "Fehler beim Ändern");
     }
   }
 

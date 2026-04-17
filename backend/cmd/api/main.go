@@ -155,6 +155,14 @@ func main() {
 			r.Delete("/stamp/active", stampHandler.Discard)
 		})
 
+		// Team member routes (read-only, any team member can access)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Use(middleware.RequireTeamMember(teamRepo))
+			r.Get("/teams/{teamID}/availability", overtimeHandler.TeamAvailability)
+			r.Get("/absences/team/{teamID}", absenceHandler.ListByTeam)
+		})
+
 		// Team leader routes (team-scoped access — all have {teamID} in URL)
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(authService))
@@ -162,9 +170,7 @@ func main() {
 			r.Post("/teams/{teamID}/members", teamHandler.AddMember)
 			r.Delete("/teams/{teamID}/members/{userID}", teamHandler.RemoveMember)
 			r.Get("/time-entries/team/{teamID}", timeEntryHandler.ListByTeam)
-			r.Get("/absences/team/{teamID}", absenceHandler.ListByTeam)
 			r.Get("/absences/team/{teamID}/pending", absenceHandler.ListPending)
-			r.Get("/teams/{teamID}/availability", overtimeHandler.TeamAvailability)
 			r.Get("/overtime/team/{teamID}", overtimeHandler.TeamOvertimeSummary)
 		})
 

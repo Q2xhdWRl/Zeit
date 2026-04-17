@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Überstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Überstunden
+        - generic [ref=e31]: Administration
+        - link "Verwaltung" [ref=e32] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e33]
+          - text: Verwaltung
+      - generic [ref=e35]:
+        - link "Anna Admin admin@newa.test" [ref=e36] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e37]
+          - generic [ref=e41]:
+            - paragraph [ref=e42]: Anna Admin
+            - paragraph [ref=e43]: admin@newa.test
+        - link "Abmelden" [ref=e44] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e45]
+          - text: Abmelden
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]: Admin
+          - generic [ref=e53]: admin@newa.test
+  - alert [ref=e67]

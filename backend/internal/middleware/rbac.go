@@ -41,6 +41,54 @@ func RequireRole(roles ...model.UserRole) func(http.Handler) http.Handler {
 	}
 }
 
+// RequireTeamMember returns middleware that checks if the user is a member of the team
+// identified by the {teamID} URL parameter. Admins always pass.
+func RequireTeamMember(teamRepo *repository.TeamRepository) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user := UserFromContext(r.Context())
+			if user == nil {
+				http.Error(w, `{"error":"Unauthorized","message":"not authenticated"}`, http.StatusUnauthorized)
+				return
+			}
+
+			if user.IsAdmin() {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			teamIDStr := chi.URLParam(r, "teamID")
+			teamID, err := uuid.Parse(teamIDStr)
+			if err != nil {
+				http.Error(w, `{"error":"Bad Request","message":"invalid team ID"}`, http.StatusBadRequest)
+				return
+			}
+
+			memberships, err := teamRepo.ListTeamsForUser(r.Context(), user.ID)
+			if err != nil {
+				log.Error().Err(err).Str("team_id", teamID.String()).Msg("failed to check team membership")
+				http.Error(w, `{"error":"Internal Server Error","message":"access check failed"}`, http.StatusInternalServerError)
+				return
+			}
+
+			isMember := false
+			for _, m := range memberships {
+				if m.TeamID == teamID {
+					isMember = true
+					break
+				}
+			}
+
+			if !isMember {
+				http.Error(w, `{"error":"Forbidden","message":"not a member of this team"}`, http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // RequireTeamAccess returns middleware that checks if the user is an admin or a team_leader
 // for the team identified by the {teamID} URL parameter.
 func RequireTeamAccess(teamRepo *repository.TeamRepository) func(http.Handler) http.Handler {

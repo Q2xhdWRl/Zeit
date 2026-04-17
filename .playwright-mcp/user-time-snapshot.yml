@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Überstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Überstunden
+      - generic [ref=e31]:
+        - link "Udo User user@newa.test" [ref=e32] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e33]
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Udo User
+            - paragraph [ref=e39]: user@newa.test
+        - link "Abmelden" [ref=e40] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e41]
+          - text: Abmelden
+    - main [ref=e44]:
+      - generic [ref=e45]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - generic [ref=e48]: Benutzer
+          - generic [ref=e49]: user@newa.test
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54]
+            - generic [ref=e60]
+          - button "Neuer Eintrag" [ref=e61]:
+            - img
+            - text: Neuer Eintrag
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]
+            - generic [ref=e69]
+          - generic [ref=e72]:
+            - generic [ref=e73]
+            - generic [ref=e77]
+          - generic [ref=e80]:
+            - generic [ref=e81]
+            - generic [ref=e88]
+          - generic [ref=e91]:
+            - generic [ref=e92]
+            - generic [ref=e97]
+        - generic [ref=e180]:
+          - generic [ref=e182]:
+            - generic [ref=e183]: Letzte Woche
+            - generic [ref=e184]: 29h 30m
+          - generic [ref=e186]:
+            - generic [ref=e187]
+            - generic [ref=e191]
+            - generic [ref=e195]
+            - generic [ref=e199]
+            - generic [ref=e203]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - button [ref=e102]
+            - button "Heute" [ref=e103]
+            - button [ref=e104]
+          - generic [ref=e105]: Mo., 13.04.2026 – So., 19.04.2026
+          - generic [ref=e106]: "Woche: 5h 30m"
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e110]
+            - paragraph [ref=e115]: Keine Einträge
+          - generic [ref=e116]:
+            - generic [ref=e118]
+            - generic [ref=e126]
+          - generic [ref=e136]:
+            - generic [ref=e138]
+            - paragraph [ref=e143]: Keine Einträge
+          - generic [ref=e144]:
+            - generic [ref=e146]
+            - paragraph [ref=e151]: Keine Einträge
+          - generic [ref=e152]:
+            - generic [ref=e154]
+            - paragraph [ref=e159]: Keine Einträge
+          - generic [ref=e160]:
+            - generic [ref=e162]
+            - paragraph [ref=e167]: Keine Einträge
+          - generic [ref=e168]:
+            - generic [ref=e170]
+            - paragraph [ref=e175]: Keine Einträge
+    - button "Stempeluhr" [ref=e208]:
+      - img [ref=e209]
+      - generic [ref=e212]: Kommen
+  - alert [ref=e176]

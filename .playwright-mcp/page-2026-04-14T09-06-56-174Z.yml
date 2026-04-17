@@ -1,0 +1,177 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Überstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Überstunden
+      - generic [ref=e31]:
+        - link "Udo User user@newa.test" [ref=e32] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e33]
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Udo User
+            - paragraph [ref=e39]: user@newa.test
+        - link "Abmelden" [ref=e40] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e41]
+          - text: Abmelden
+    - main [ref=e44]:
+      - generic [ref=e45]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - generic [ref=e48]: Benutzer
+          - generic [ref=e49]: user@newa.test
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - img [ref=e54]
+            - heading "An- und Abwesenheit" [level=1] [ref=e56]
+          - button "Abwesenheit beantragen" [active] [ref=e57]:
+            - img
+            - text: Abwesenheit beantragen
+        - generic [ref=e58]:
+          - button "Teamkalender" [ref=e59]
+          - button "Abwesenheit" [ref=e60]
+        - generic [ref=e302]:
+          - button [ref=e303]:
+            - img
+          - button "Heute" [ref=e304]
+          - button [ref=e305]:
+            - img
+          - generic [ref=e306]: April 2026
+        - generic [ref=e307]:
+          - generic [ref=e308]:
+            - generic [ref=e310]: Urlaubskonto 2026
+            - generic [ref=e312]:
+              - generic [ref=e313]:
+                - paragraph [ref=e314]: Anspruch
+                - paragraph [ref=e315]: 30d
+              - generic [ref=e316]:
+                - paragraph [ref=e317]: Übertrag
+                - paragraph [ref=e318]: 0d
+              - generic [ref=e319]:
+                - paragraph [ref=e320]: Genommen
+                - paragraph [ref=e321]: 0d
+              - generic [ref=e322]:
+                - paragraph [ref=e323]: Beantragt
+                - paragraph [ref=e324]: 5d
+              - generic [ref=e325]:
+                - paragraph [ref=e326]: Verbleibend
+                - paragraph [ref=e327]: 25d
+          - generic [ref=e330]:
+            - generic [ref=e331]: Mo
+            - generic [ref=e332]: Di
+            - generic [ref=e333]: Mi
+            - generic [ref=e334]: Do
+            - generic [ref=e335]: Fr
+            - generic [ref=e336]: Sa
+            - generic [ref=e337]: So
+            - generic [ref=e338]: "30"
+            - generic [ref=e339]: "31"
+            - generic [ref=e340]: "1"
+            - generic [ref=e341]: "2"
+            - generic [ref=e342]: "3"
+            - generic [ref=e343]: "4"
+            - generic [ref=e344]: "5"
+            - generic [ref=e345]: "6"
+            - generic [ref=e346]: "7"
+            - generic [ref=e347]: "8"
+            - generic [ref=e348]: "9"
+            - generic [ref=e349]: "10"
+            - generic [ref=e350]: "11"
+            - generic [ref=e351]: "12"
+            - generic "Homeoffice" [ref=e352]: "13"
+            - generic "Homeoffice" [ref=e354]: "14"
+            - generic [ref=e356]: "15"
+            - generic [ref=e357]: "16"
+            - generic [ref=e358]: "17"
+            - generic [ref=e359]: "18"
+            - generic [ref=e360]: "19"
+            - generic [ref=e361]: "20"
+            - generic [ref=e362]: "21"
+            - generic [ref=e363]: "22"
+            - generic [ref=e364]: "23"
+            - generic [ref=e365]: "24"
+            - generic [ref=e366]: "25"
+            - generic [ref=e367]: "26"
+            - generic [ref=e368]: "27"
+            - generic [ref=e369]: "28"
+            - generic [ref=e370]: "29"
+            - generic [ref=e371]: "30"
+            - generic [ref=e372]: "1"
+            - generic [ref=e373]: "2"
+            - generic [ref=e374]: "3"
+          - generic [ref=e375]:
+            - heading "Abwesenheiten April 2026" [level=3] [ref=e376]
+            - generic [ref=e378]:
+              - generic [ref=e381]:
+                - generic [ref=e382]:
+                  - generic [ref=e383]: Homeoffice
+                  - generic [ref=e384]: Genehmigt
+                - paragraph [ref=e385]: 13.04.2026 · 1 Arbeitstag
+              - button "Stornieren" [ref=e387]:
+                - img
+            - generic [ref=e389]:
+              - generic [ref=e392]:
+                - generic [ref=e393]:
+                  - generic [ref=e394]: Homeoffice
+                  - generic [ref=e395]: Genehmigt
+                - paragraph [ref=e396]: 14.04.2026 · 1 Arbeitstag
+              - button "Stornieren" [ref=e398]:
+                - img
+        - generic [ref=e400]:
+          - generic [ref=e401]:
+            - heading "Abwesenheit beantragen" [level=2] [ref=e402]
+            - button [ref=e403]:
+              - img [ref=e404]
+          - generic [ref=e407]:
+            - generic [ref=e408]:
+              - generic [ref=e409]: Art
+              - combobox "Art" [ref=e410]:
+                - option "Bitte wählen" [selected]
+                - option "Urlaub"
+                - option "Krankheit"
+                - option "Homeoffice"
+                - option "Elternzeit"
+                - option "Fortbildung"
+                - option "Sonderurlaub"
+                - option "Unbezahlt"
+            - generic [ref=e411]:
+              - generic [ref=e412]:
+                - generic [ref=e413]: Von
+                - textbox "Von" [ref=e414]: 2026-04-14
+              - generic [ref=e415]:
+                - generic [ref=e416]: Bis
+                - textbox "Bis" [ref=e417]: 2026-04-14
+            - paragraph [ref=e418]: 1 Arbeitstag
+            - generic [ref=e419]:
+              - generic [ref=e420]: Bemerkung (optional)
+              - textbox "Bemerkung (optional)" [ref=e421]:
+                - /placeholder: Optional
+            - generic [ref=e422]:
+              - button "Beantragen" [ref=e423]
+              - button "Abbrechen" [ref=e424]
+    - button "Stempeluhr" [ref=e185]:
+      - img [ref=e186]
+      - generic [ref=e189]: 00:02
+  - alert [ref=e190]

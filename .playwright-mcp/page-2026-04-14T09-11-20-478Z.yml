@@ -1,0 +1,424 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Überstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Überstunden
+      - generic [ref=e31]:
+        - link "Udo User user@newa.test" [ref=e32] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e33]
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Udo User
+            - paragraph [ref=e39]: user@newa.test
+        - link "Abmelden" [ref=e40] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e41]
+          - text: Abmelden
+    - main [ref=e44]:
+      - generic [ref=e45]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - generic [ref=e48]: Benutzer
+          - generic [ref=e49]: user@newa.test
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - img [ref=e54]
+            - heading "An- und Abwesenheit" [level=1] [ref=e56]
+          - button "Abwesenheit beantragen" [active] [ref=e57]:
+            - img
+            - text: Abwesenheit beantragen
+        - generic [ref=e58]:
+          - button "Teamkalender" [ref=e59]
+          - button "Abwesenheit" [ref=e60]
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - button [ref=e63]:
+              - img
+            - button "Heute" [ref=e64]
+            - button [ref=e65]:
+              - img
+          - generic [ref=e66]: April 2026
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70]: 3 Personen
+            - generic [ref=e71]: April 2026
+            - generic [ref=e72]: Mai 2026
+            - generic [ref=e73]: Juni 2026
+          - generic [ref=e74]:
+            - generic [ref=e76]: KW14
+            - generic [ref=e77]: KW15
+            - generic [ref=e78]: KW16
+            - generic [ref=e79]: KW17
+            - generic [ref=e80]: KW18
+            - generic [ref=e81]: KW19
+            - generic [ref=e82]: KW20
+            - generic [ref=e83]: KW21
+            - generic [ref=e84]: KW22
+            - generic [ref=e85]: KW23
+            - generic [ref=e86]: KW24
+            - generic [ref=e87]: KW25
+            - generic [ref=e88]: KW26
+            - generic [ref=e89]: KW27
+          - generic [ref=e90]:
+            - generic [ref=e92]:
+              - text: Mi
+              - text: "1"
+            - generic [ref=e93]:
+              - text: Do
+              - text: "2"
+            - generic [ref=e94]:
+              - text: Fr
+              - text: "3"
+            - generic [ref=e95]:
+              - text: Sa
+              - text: "4"
+            - generic [ref=e96]:
+              - text: So
+              - text: "5"
+            - generic [ref=e97]:
+              - text: Mo
+              - text: "6"
+            - generic [ref=e98]:
+              - text: Di
+              - text: "7"
+            - generic [ref=e99]:
+              - text: Mi
+              - text: "8"
+            - generic [ref=e100]:
+              - text: Do
+              - text: "9"
+            - generic [ref=e101]:
+              - text: Fr
+              - text: "10"
+            - generic [ref=e102]:
+              - text: Sa
+              - text: "11"
+            - generic [ref=e103]:
+              - text: So
+              - text: "12"
+            - generic [ref=e104]:
+              - text: Mo
+              - text: "13"
+            - generic [ref=e105]:
+              - text: Di
+              - text: "14"
+            - generic [ref=e106]:
+              - text: Mi
+              - text: "15"
+            - generic [ref=e107]:
+              - text: Do
+              - text: "16"
+            - generic [ref=e108]:
+              - text: Fr
+              - text: "17"
+            - generic [ref=e109]:
+              - text: Sa
+              - text: "18"
+            - generic [ref=e110]:
+              - text: So
+              - text: "19"
+            - generic [ref=e111]:
+              - text: Mo
+              - text: "20"
+            - generic [ref=e112]:
+              - text: Di
+              - text: "21"
+            - generic [ref=e113]:
+              - text: Mi
+              - text: "22"
+            - generic [ref=e114]:
+              - text: Do
+              - text: "23"
+            - generic [ref=e115]:
+              - text: Fr
+              - text: "24"
+            - generic [ref=e116]:
+              - text: Sa
+              - text: "25"
+            - generic [ref=e117]:
+              - text: So
+              - text: "26"
+            - generic [ref=e118]:
+              - text: Mo
+              - text: "27"
+            - generic [ref=e119]:
+              - text: Di
+              - text: "28"
+            - generic [ref=e120]:
+              - text: Mi
+              - text: "29"
+            - generic [ref=e121]:
+              - text: Do
+              - text: "30"
+            - generic [ref=e122]:
+              - text: Fr
+              - text: "1"
+            - generic [ref=e123]:
+              - text: Sa
+              - text: "2"
+            - generic [ref=e124]:
+              - text: So
+              - text: "3"
+            - generic [ref=e125]:
+              - text: Mo
+              - text: "4"
+            - generic [ref=e126]:
+              - text: Di
+              - text: "5"
+            - generic [ref=e127]:
+              - text: Mi
+              - text: "6"
+            - generic [ref=e128]:
+              - text: Do
+              - text: "7"
+            - generic [ref=e129]:
+              - text: Fr
+              - text: "8"
+            - generic [ref=e130]:
+              - text: Sa
+              - text: "9"
+            - generic [ref=e131]:
+              - text: So
+              - text: "10"
+            - generic [ref=e132]:
+              - text: Mo
+              - text: "11"
+            - generic [ref=e133]:
+              - text: Di
+              - text: "12"
+            - generic [ref=e134]:
+              - text: Mi
+              - text: "13"
+            - generic [ref=e135]:
+              - text: Do
+              - text: "14"
+            - generic [ref=e136]:
+              - text: Fr
+              - text: "15"
+            - generic [ref=e137]:
+              - text: Sa
+              - text: "16"
+            - generic [ref=e138]:
+              - text: So
+              - text: "17"
+            - generic [ref=e139]:
+              - text: Mo
+              - text: "18"
+            - generic [ref=e140]:
+              - text: Di
+              - text: "19"
+            - generic [ref=e141]:
+              - text: Mi
+              - text: "20"
+            - generic [ref=e142]:
+              - text: Do
+              - text: "21"
+            - generic [ref=e143]:
+              - text: Fr
+              - text: "22"
+            - generic [ref=e144]:
+              - text: Sa
+              - text: "23"
+            - generic [ref=e145]:
+              - text: So
+              - text: "24"
+            - generic [ref=e146]:
+              - text: Mo
+              - text: "25"
+            - generic [ref=e147]:
+              - text: Di
+              - text: "26"
+            - generic [ref=e148]:
+              - text: Mi
+              - text: "27"
+            - generic [ref=e149]:
+              - text: Do
+              - text: "28"
+            - generic [ref=e150]:
+              - text: Fr
+              - text: "29"
+            - generic [ref=e151]:
+              - text: Sa
+              - text: "30"
+            - generic [ref=e152]:
+              - text: So
+              - text: "31"
+            - generic [ref=e153]:
+              - text: Mo
+              - text: "1"
+            - generic [ref=e154]:
+              - text: Di
+              - text: "2"
+            - generic [ref=e155]:
+              - text: Mi
+              - text: "3"
+            - generic [ref=e156]:
+              - text: Do
+              - text: "4"
+            - generic [ref=e157]:
+              - text: Fr
+              - text: "5"
+            - generic [ref=e158]:
+              - text: Sa
+              - text: "6"
+            - generic [ref=e159]:
+              - text: So
+              - text: "7"
+            - generic [ref=e160]:
+              - text: Mo
+              - text: "8"
+            - generic [ref=e161]:
+              - text: Di
+              - text: "9"
+            - generic [ref=e162]:
+              - text: Mi
+              - text: "10"
+            - generic [ref=e163]:
+              - text: Do
+              - text: "11"
+            - generic [ref=e164]:
+              - text: Fr
+              - text: "12"
+            - generic [ref=e165]:
+              - text: Sa
+              - text: "13"
+            - generic [ref=e166]:
+              - text: So
+              - text: "14"
+            - generic [ref=e167]:
+              - text: Mo
+              - text: "15"
+            - generic [ref=e168]:
+              - text: Di
+              - text: "16"
+            - generic [ref=e169]:
+              - text: Mi
+              - text: "17"
+            - generic [ref=e170]:
+              - text: Do
+              - text: "18"
+            - generic [ref=e171]:
+              - text: Fr
+              - text: "19"
+            - generic [ref=e172]:
+              - text: Sa
+              - text: "20"
+            - generic [ref=e173]:
+              - text: So
+              - text: "21"
+            - generic [ref=e174]:
+              - text: Mo
+              - text: "22"
+            - generic [ref=e175]:
+              - text: Di
+              - text: "23"
+            - generic [ref=e176]:
+              - text: Mi
+              - text: "24"
+            - generic [ref=e177]:
+              - text: Do
+              - text: "25"
+            - generic [ref=e178]:
+              - text: Fr
+              - text: "26"
+            - generic [ref=e179]:
+              - text: Sa
+              - text: "27"
+            - generic [ref=e180]:
+              - text: So
+              - text: "28"
+            - generic [ref=e181]:
+              - text: Mo
+              - text: "29"
+            - generic [ref=e182]:
+              - text: Di
+              - text: "30"
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - generic [ref=e193]: AA
+              - generic [ref=e194]:
+                - generic [ref=e195]: Anna Admin
+                - generic [ref=e196]: Admin
+            - button "Urlaub · 5 Tage" [ref=e225]:
+              - generic [ref=e226]: Urlaub · 5 Tage
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - generic [ref=e229]: LL
+              - generic [ref=e230]:
+                - generic [ref=e231]: Lars Leiter
+                - generic [ref=e232]: Teamleiter
+            - button "Krankheit · 2 Tage" [ref=e261]:
+              - generic [ref=e262]: Krankheit · 2 Tage
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: UU
+              - generic [ref=e266]:
+                - generic [ref=e267]: Udo User
+                - generic [ref=e268]: Benutzer
+            - generic [ref=e269]:
+              - button "Homeoffice (13.04. – 13.04.)" [ref=e297]
+              - button "Homeoffice (14.04. – 14.04.)" [ref=e298]
+              - button "Urlaub · 6 Tage Ausstehend" [ref=e299]:
+                - generic [ref=e300]: Urlaub · 6 Tage
+                - generic "Ausstehend" [ref=e301]
+              - button "Urlaub · 5 Tage Ausstehend" [ref=e302]:
+                - generic [ref=e303]: Urlaub · 5 Tage
+                - generic "Ausstehend" [ref=e304]
+        - generic [ref=e306]:
+          - generic [ref=e307]:
+            - heading "Abwesenheit beantragen" [level=2] [ref=e308]
+            - button [ref=e309]:
+              - img [ref=e310]
+          - generic [ref=e313]:
+            - generic [ref=e314]:
+              - generic [ref=e315]: Art
+              - combobox "Art" [ref=e316]:
+                - option "Bitte wählen" [selected]
+                - option "Urlaub"
+                - option "Krankheit"
+                - option "Homeoffice"
+                - option "Elternzeit"
+                - option "Fortbildung"
+                - option "Sonderurlaub"
+                - option "Unbezahlt"
+            - generic [ref=e317]:
+              - generic [ref=e318]:
+                - generic [ref=e319]: Von
+                - textbox "Von" [ref=e320]: 2026-04-14
+              - generic [ref=e321]:
+                - generic [ref=e322]: Bis
+                - textbox "Bis" [ref=e323]: 2026-04-14
+            - paragraph [ref=e324]: 1 Arbeitstag
+            - generic [ref=e325]:
+              - generic [ref=e326]: Bemerkung (optional)
+              - textbox "Bemerkung (optional)" [ref=e327]:
+                - /placeholder: Optional
+            - generic [ref=e328]:
+              - button "Beantragen" [ref=e329]
+              - button "Abbrechen" [ref=e330]
+    - button "Stempeluhr" [ref=e185]:
+      - img [ref=e186]
+      - generic [ref=e189]: 00:06
+  - alert [ref=e190]

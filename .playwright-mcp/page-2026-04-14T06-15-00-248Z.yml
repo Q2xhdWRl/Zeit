@@ -1,0 +1,114 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: Zeit
+      - navigation [ref=e6]:
+        - generic [ref=e7]: Navigation
+        - link "Startseite" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Startseite
+        - link "Zeiterfassung" [ref=e14] [cursor=pointer]:
+          - /url: /time
+          - img [ref=e15]
+          - text: Zeiterfassung
+        - link "Abwesenheiten" [ref=e18] [cursor=pointer]:
+          - /url: /absences
+          - img [ref=e19]
+          - text: Abwesenheiten
+        - link "Team" [ref=e21] [cursor=pointer]:
+          - /url: /team
+          - img [ref=e22]
+          - text: Team
+        - link "Überstunden" [ref=e27] [cursor=pointer]:
+          - /url: /overtime
+          - img [ref=e28]
+          - text: Überstunden
+        - generic [ref=e31]: Administration
+        - link "Verwaltung" [ref=e32] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e33]
+          - text: Verwaltung
+      - generic [ref=e35]:
+        - link "Anna Admin admin@newa.test" [ref=e36] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e37]
+          - generic [ref=e41]:
+            - paragraph [ref=e42]: Anna Admin
+            - paragraph [ref=e43]: admin@newa.test
+        - link "Abmelden" [ref=e44] [cursor=pointer]:
+          - /url: /api/auth/logout
+          - img [ref=e45]
+          - text: Abmelden
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - heading "NEWA Zeiterfassung" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]: Admin
+          - generic [ref=e53]: admin@newa.test
+      - generic [ref=e55]:
+        - heading "Mein Profil" [level=1] [ref=e56]
+        - generic [ref=e58]:
+          - generic [ref=e59]: AA
+          - generic [ref=e60]:
+            - paragraph [ref=e61]: Anna Admin
+            - paragraph [ref=e62]: admin@newa.test
+            - generic [ref=e64]: Admin
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - img [ref=e68]
+              - generic [ref=e71]: Arbeitszeitmodell
+            - generic [ref=e72]:
+              - paragraph [ref=e73]: Gültig ab 01.01.2026 · 40 h/Woche
+              - generic [ref=e74]:
+                - generic [ref=e75]:
+                  - generic [ref=e76]: Mo
+                  - generic [ref=e77]: 8h
+                - generic [ref=e78]:
+                  - generic [ref=e79]: Di
+                  - generic [ref=e80]: 8h
+                - generic [ref=e81]:
+                  - generic [ref=e82]: Mi
+                  - generic [ref=e83]: 8h
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Do
+                  - generic [ref=e86]: 8h
+                - generic [ref=e87]:
+                  - generic [ref=e88]: Fr
+                  - generic [ref=e89]: 8h
+                - generic [ref=e90]:
+                  - generic [ref=e91]: Sa
+                  - generic [ref=e92]: –
+                - generic [ref=e93]:
+                  - generic [ref=e94]: So
+                  - generic [ref=e95]: –
+          - generic [ref=e96]:
+            - generic [ref=e97]:
+              - img [ref=e98]
+              - generic [ref=e100]: Urlaubskonto 2026
+            - generic [ref=e102]:
+              - generic [ref=e103]:
+                - generic [ref=e104]: "33"
+                - generic [ref=e105]: Anspruch gesamt
+              - generic [ref=e106]:
+                - generic [ref=e107]: "28"
+                - generic [ref=e108]: Verbleibend
+              - generic [ref=e109]:
+                - generic [ref=e110]: "5"
+                - generic [ref=e111]: Genommen
+              - generic [ref=e112]:
+                - generic [ref=e113]: "0"
+                - generic [ref=e114]: Ausstehend
+              - generic [ref=e115]: Davon 3 Tage Übertrag aus dem Vorjahr
+        - generic [ref=e116]:
+          - generic [ref=e118]:
+            - img [ref=e119]
+            - text: Kontoinformationen
+          - generic [ref=e125]:
+            - term [ref=e126]: Konto angelegt
+            - definition [ref=e127]: 25.03.2026
+    - button "Stempeluhr" [ref=e129]:
+      - img [ref=e130]
+      - generic [ref=e133]: Kommen
+  - alert [ref=e134]

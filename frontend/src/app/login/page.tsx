@@ -70,7 +70,7 @@ export default function LoginPage() {
               </Button>
             </a>
             <p className="text-center text-xs text-muted-foreground">
-              Sichere Anmeldung ueber Microsoft 365 &middot; DSGVO-konform
+              Sichere Anmeldung über Microsoft 365 &middot; DSGVO-konform
             </p>
           </CardContent>
         </Card>

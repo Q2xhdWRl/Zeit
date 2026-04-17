@@ -59,6 +59,8 @@
    ============================================================= */
 
 :root {
+  color-scheme: dark;
+
   /* --- Primitives --- */
   --neon-cyan: oklch(0.75 0.15 210);
   --neon-green: oklch(0.82 0.2 155);

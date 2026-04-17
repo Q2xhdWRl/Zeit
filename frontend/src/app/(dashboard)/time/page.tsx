@@ -216,12 +216,12 @@ export default function TimePage() {
   }
 
   async function handleDelete(entryId: string) {
-    if (!window.confirm("Zeiteintrag wirklich loeschen?")) return;
+    if (!window.confirm("Zeiteintrag wirklich löschen?")) return;
     try {
       await deleteTimeEntry(entryId);
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Loeschen");
+      setError(err instanceof Error ? err.message : "Fehler beim Löschen");
     }
   }
 
@@ -626,7 +626,7 @@ export default function TimePage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(entry.id)}
-                              aria-label="Loeschen"
+                              aria-label="Löschen"
                             >
                               <Trash2 className="size-3.5 text-destructive" />
                             </Button>

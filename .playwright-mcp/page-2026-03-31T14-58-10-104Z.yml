@@ -1,0 +1,38 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: NEWA Zeiterfassung
+        - heading "Anmelden" [level=1] [ref=e6]
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: Willkommen
+          - generic [ref=e10]: Melden Sie sich mit Ihrem Microsoft-Konto an, um fortzufahren.
+        - generic [ref=e11]:
+          - link "Anmelden (Dev)" [ref=e12] [cursor=pointer]:
+            - /url: http://localhost:8080/api/auth/dev-login?token=dev-admin-token
+            - button "Anmelden (Dev)" [ref=e13]:
+              - img
+              - text: Anmelden (Dev)
+          - paragraph [ref=e14]: Sichere Anmeldung ueber Microsoft 365 · DSGVO-konform
+      - generic [ref=e15]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: DEV
+          - text: Schnellanmeldung
+        - generic [ref=e19]:
+          - link "Admin Admin (Anna Admin)" [ref=e20] [cursor=pointer]:
+            - /url: http://localhost:8080/api/auth/dev-login?token=dev-admin-token
+            - button "Admin Admin (Anna Admin)" [ref=e21]:
+              - generic [ref=e22]: Admin
+              - text: Admin (Anna Admin)
+          - link "TL Teamleiter (Lars Leiter)" [ref=e23] [cursor=pointer]:
+            - /url: http://localhost:8080/api/auth/dev-login?token=dev-leader-token
+            - button "TL Teamleiter (Lars Leiter)" [ref=e24]:
+              - generic [ref=e25]: TL
+              - text: Teamleiter (Lars Leiter)
+          - link "User Benutzer (Udo User)" [ref=e26] [cursor=pointer]:
+            - /url: http://localhost:8080/api/auth/dev-login?token=dev-user-token
+            - button "User Benutzer (Udo User)" [ref=e27]:
+              - generic [ref=e28]: User
+              - text: Benutzer (Udo User)
+  - alert [ref=e29]
